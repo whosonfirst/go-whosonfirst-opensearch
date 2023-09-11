@@ -1,27 +1,26 @@
 package index
 
 import (
-	"bytes"
+	_ "bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
 	"io"
-	"log"
+	_ "log"
 	"strconv"
-	"strings"
-	"time"
+	_ "strings"
+	_ "time"
 
-	"github.com/cenkalti/backoff/v4"
-	opensearch "github.com/opensearch-project/opensearch-go/v2"
+	_ "github.com/cenkalti/backoff/v4"
 	opensearchapi "github.com/opensearch-project/opensearch-go/v2/opensearchapi"
 	opensearchutil "github.com/opensearch-project/opensearch-go/v2/opensearchutil"
-	"github.com/sfomuseum/go-flags/flagset"
+	_ "github.com/sfomuseum/go-flags/flagset"
 	"github.com/sfomuseum/go-flags/lookup"
 	"github.com/sfomuseum/go-whosonfirst-opensearch/document"
 	"github.com/tidwall/gjson"
-	"github.com/whosonfirst/go-whosonfirst-iterate/v2/emitter"
+	_ "github.com/whosonfirst/go-whosonfirst-iterate/v2/emitter"
 	"github.com/whosonfirst/go-whosonfirst-iterate/v2/iterator"
 )
 
@@ -36,8 +35,8 @@ const FLAG_WORKERS string = "workers"
 
 // type RunBulkIndexerOptions contains runtime configurations for bulk indexing
 type RunBulkIndexerOptions struct {
-	// BulkIndexer is a `opensearch.Client` instance
-	Client opensearch.Client
+	// BulkIndexer is a `opensearch.Transport` instance
+	Client opensearchapi.Transport
 	Index  string
 	// PrepareFuncs are one or more `document.PrepareDocumentFunc` used to transform a document before indexing
 	PrepareFuncs []document.PrepareDocumentFunc
@@ -102,7 +101,7 @@ func PrepareFuncsFromFlagSet(ctx context.Context, fs *flag.FlagSet) ([]document.
 }
 
 // RunBulkIndexer will "bulk" index a set of Who's On First documents with configuration details defined in 'opts'.
-func RunBulkIndexer(ctx context.Context, opts *RunBulkIndexerOptions) (*esutil.BulkIndexerStats, error) {
+func RunBulkIndexer(ctx context.Context, opts *RunBulkIndexerOptions) error {
 
 	os_client := opts.Client
 	os_index := opts.Index
@@ -181,7 +180,7 @@ func RunBulkIndexer(ctx context.Context, opts *RunBulkIndexerOptions) (*esutil.B
 			Body:       opensearchutil.NewJSONReader(&f),
 		}
 
-		rsp, err := req.Do(ctx, os_client)
+		_, err = req.Do(ctx, os_client)
 
 		if err != nil {
 			return fmt.Errorf("Failed to index %d, %w", doc_id, err)
@@ -195,8 +194,6 @@ func RunBulkIndexer(ctx context.Context, opts *RunBulkIndexerOptions) (*esutil.B
 	if err != nil {
 		return err
 	}
-
-	t1 := time.Now()
 
 	err = iter.IterateURIs(ctx, iterator_paths...)
 
