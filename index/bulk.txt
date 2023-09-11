@@ -1,0 +1,139 @@
+// NewBulkIndexerFlagSet creates a new `flag.FlagSet` instance with command-line flags required by the `es-whosonfirst-index` tool.
+func NewBulkIndexerFlagSet(ctx context.Context) (*flag.FlagSet, error) {
+
+	fs := flagset.NewFlagSet("bulk")
+
+	valid_schemes := strings.Join(emitter.Schemes(), ",")
+	iterator_desc := fmt.Sprintf("A valid whosonfirst/go-whosonfirst-iterator/emitter URI. Supported emitter URI schemes are: %s", valid_schemes)
+
+	fs.String(FLAG_OS_ENDPOINT, "http://localhost:9200", "A fully-qualified Opensearch endpoint.")
+	fs.String(FLAG_OS_INDEX, "millsfield", "A valid Opensearch index.")
+	fs.String(FLAG_ITERATOR_URI, "repo://", iterator_desc)
+	fs.Bool(FLAG_INDEX_ALT, false, "Index alternate geometries.")
+	fs.Bool(FLAG_INDEX_PROPS, false, "Only index GeoJSON Feature properties (not geometries).")
+	fs.Bool(FLAG_INDEX_SPELUNKER_V1, false, "Index GeoJSON Feature properties inclusive of auto-generated Whos On First Spelunker properties.")
+	fs.Bool(FLAG_APPEND_SPELUNKER_V1, false, "Append and index auto-generated Whos On First Spelunker properties.")
+	fs.Int(FLAG_WORKERS, 0, "The number of concurrent workers to index data using. Default is the value of runtime.NumCPU().")
+
+	// debug := fs.Bool("debug", false, "...")
+
+	return fs, nil
+}
+
+// BulkIndexerFromFlagSet returns a esutil.BulkIndexer instance derived from the values in 'fs'.
+func BulkIndexerFromFlagSet(ctx context.Context, fs *flag.FlagSet) (esutil.BulkIndexer, error) {
+
+	os_endpoint, err := lookup.StringVar(fs, FLAG_OS_ENDPOINT)
+
+	if err != nil {
+		return nil, err
+	}
+
+	os_index, err := lookup.StringVar(fs, FLAG_OS_INDEX)
+
+	if err != nil {
+		return nil, err
+	}
+
+	workers, err := lookup.IntVar(fs, FLAG_WORKERS)
+
+	if err != nil {
+		return nil, err
+	}
+
+	retry := backoff.NewExponentialBackOff()
+
+	os_cfg := es.Config{
+		Addresses: []string{os_endpoint},
+
+		RetryOnStatus: []int{502, 503, 504, 429},
+		RetryBackoff: func(i int) time.Duration {
+			if i == 1 {
+				retry.Reset()
+			}
+			return retry.NextBackOff()
+		},
+		MaxRetries: 5,
+	}
+
+	os_client, err := opensearch.NewDefaultClient()
+
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = os_client.Indices.Create(os_index)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// https://github.com/elastic/go-opensearch/blob/master/_examples/bulk/indexer.go
+
+	bi_cfg := esutil.BulkIndexerConfig{
+		Index:         os_index,
+		Client:        os_client,
+		NumWorkers:    workers,
+		FlushInterval: 30 * time.Second,
+	}
+
+	bi, err := esutil.NewBulkIndexer(bi_cfg)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return bi, nil
+}
+
+// RunBulkIndexerOptionsFromFlagSet returns a `RunBulkIndexerOptions` instance derived from the values in 'fs'.
+func RunBulkIndexerOptionsFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*RunBulkIndexerOptions, error) {
+
+	iterator_uri, err := lookup.StringVar(fs, FLAG_ITERATOR_URI)
+
+	if err != nil {
+		return nil, err
+	}
+
+	index_alt, err := lookup.BoolVar(fs, FLAG_INDEX_ALT)
+
+	if err != nil {
+		return nil, err
+	}
+
+	bi, err := BulkIndexerFromFlagSet(ctx, fs)
+
+	if err != nil {
+		return nil, err
+	}
+
+	prepare_funcs, err := PrepareFuncsFromFlagSet(ctx, fs)
+
+	if err != nil {
+		return nil, fmt.Errorf("Failed to derive default prepare funcs from flagset, %w", err)
+	}
+
+	iterator_paths := fs.Args()
+
+	opts := &RunBulkIndexerOptions{
+		BulkIndexer:   bi,
+		PrepareFuncs:  prepare_funcs,
+		IteratorURI:   iterator_uri,
+		IteratorPaths: iterator_paths,
+		IndexAltFiles: index_alt,
+	}
+
+	return opts, nil
+}
+
+// RunBulkIndexerWithFlagSet will "bulk" index a set of Who's On First documents with configuration details defined in 'fs'.
+func RunBulkIndexerWithFlagSet(ctx context.Context, fs *flag.FlagSet) (*esutil.BulkIndexerStats, error) {
+
+	opts, err := RunBulkIndexerOptionsFromFlagSet(ctx, fs)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return RunBulkIndexer(ctx, opts)
+}
