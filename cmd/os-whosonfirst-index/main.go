@@ -6,15 +6,17 @@ import (
 
 import (
 	"context"
+	"crypto/tls"
 	_ "encoding/json"
 	_ "fmt"
-	"net/http"
 	"log"
-	"crypto/tls"
+	"net/http"
 
-	"github.com/sfomuseum/go-flags/flagset"
-	"github.com/sfomuseum/go-whosonfirst-opensearch/index"
 	opensearch "github.com/opensearch-project/opensearch-go/v2"
+	"github.com/sfomuseum/go-flags/flagset"
+	"github.com/sfomuseum/go-flags/multi"
+	"github.com/sfomuseum/go-whosonfirst-opensearch/document"
+	"github.com/sfomuseum/go-whosonfirst-opensearch/index"
 )
 
 func main() {
@@ -22,11 +24,20 @@ func main() {
 	var os_index string
 	var os_user string
 	var os_pswd string
+	var iterator_uri string
+	var iterator_paths multi.MultiString
+
+	var index_alt_files bool
 
 	fs := flagset.NewFlagSet("opensearch")
 	fs.StringVar(&os_index, "opensearch-index", "", "...")
 	fs.StringVar(&os_user, "opensearch-user", "", "...")
 	fs.StringVar(&os_pswd, "opensearch-password", "", "...")
+
+	fs.StringVar(&iterator_uri, "iterator-uri", "repo://", "...")
+	fs.Var(&iterator_paths, "iterator-path", "...")
+
+	fs.BoolVar(&index_alt_files, "index-alt-files", false, "...")
 
 	flagset.Parse(fs)
 
@@ -40,17 +51,23 @@ func main() {
 		Username:  os_user,
 		Password:  os_pswd,
 	})
+
 	if err != nil {
 		log.Fatalf("Failed to create client, %w", err)
 	}
 
-	if err != nil {
-		log.Fatalf("Failed to create new flagset, %v", err)
-	}
+	// create index here...
+
+	prepare_funcs := make([]document.PrepareDocumentFunc, 0)
+	prepare_funcs = append(prepare_funcs, document.AppendSpelunkerV1Properties)
 
 	opts := &index.RunBulkIndexerOptions{
-		Client: client,
-		Index:  os_index,
+		Client:        client,
+		Index:         os_index,
+		IteratorURI:   iterator_uri,
+		IteratorPaths: iterator_paths,
+		IndexAltFiles: index_alt_files,
+		PrepareFuncs:  prepare_funcs,
 	}
 
 	err = index.RunBulkIndexer(ctx, opts)
