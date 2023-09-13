@@ -105,6 +105,11 @@ func RunBulkIndexer(ctx context.Context, opts *RunBulkIndexerOptions) error {
 	iterator_paths := opts.IteratorPaths
 	index_alt := opts.IndexAltFiles
 
+	mu := new(sync.RWMutex)
+
+	docs := make([]interface{})
+	max_docs := 1000
+
 	iter_cb := func(ctx context.Context, path string, fh io.ReadSeeker, args ...interface{}) error {
 
 		body, err := io.ReadAll(fh)
@@ -157,6 +162,19 @@ func RunBulkIndexer(ctx context.Context, opts *RunBulkIndexerOptions) error {
 			return errors.New(msg)
 		}
 
+		mu.Lock()
+		defer mu.Unlock()
+
+		docs = append(docs, f)
+
+		if len(docs) < max_docs {
+			return nil
+		}
+
+		// https://forum.opensearch.org/t/opensearch-go-bulk-request/9190
+		// https://github.com/opensearch-project/opensearch-go/blob/1.1/opensearchutil/bulk_indexer.go
+
+		/*
 		req := opensearchapi.IndexRequest{
 			Index:      os_index,
 			DocumentID: doc_id,
@@ -168,6 +186,9 @@ func RunBulkIndexer(ctx context.Context, opts *RunBulkIndexerOptions) error {
 		if err != nil {
 			return fmt.Errorf("Failed to index %d, %w", doc_id, err)
 		}
+		*/
+
+		docs = make([]interface{}, 0)
 
 		// log.Printf("Indexed %s\n", path)
 		return nil
