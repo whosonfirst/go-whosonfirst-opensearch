@@ -8,7 +8,6 @@ go 1.21
 // Good times...
 
 require (
-	github.com/cenkalti/backoff/v4 v4.1.2
 	github.com/opensearch-project/opensearch-go/v2 v2.3.0
 	github.com/sfomuseum/go-edtf v0.3.1
 	github.com/sfomuseum/go-flags v0.8.2

@@ -1,7 +1,6 @@
 package index
 
 import (
-	_ "bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -10,17 +9,12 @@ import (
 	"io"
 	_ "log"
 	"strconv"
-	_ "strings"
-	_ "time"
 
-	_ "github.com/cenkalti/backoff/v4"
 	opensearchapi "github.com/opensearch-project/opensearch-go/v2/opensearchapi"
 	opensearchutil "github.com/opensearch-project/opensearch-go/v2/opensearchutil"
-	_ "github.com/sfomuseum/go-flags/flagset"
 	"github.com/sfomuseum/go-flags/lookup"
 	"github.com/sfomuseum/go-whosonfirst-opensearch/document"
 	"github.com/tidwall/gjson"
-	_ "github.com/whosonfirst/go-whosonfirst-iterate/v2/emitter"
 	"github.com/whosonfirst/go-whosonfirst-iterate/v2/iterator"
 )
 
@@ -163,17 +157,6 @@ func RunBulkIndexer(ctx context.Context, opts *RunBulkIndexerOptions) error {
 			return errors.New(msg)
 		}
 
-		/*
-			enc_f, err := json.Marshal(f)
-
-			if err != nil {
-				msg := fmt.Sprintf("Failed to marshal %s, %v", path, err)
-				return errors.New(msg)
-			}
-
-			// log.Println(string(enc_f))
-		*/
-
 		req := opensearchapi.IndexRequest{
 			Index:      os_index,
 			DocumentID: doc_id,
@@ -186,6 +169,7 @@ func RunBulkIndexer(ctx context.Context, opts *RunBulkIndexerOptions) error {
 			return fmt.Errorf("Failed to index %d, %w", doc_id, err)
 		}
 
+		// log.Printf("Indexed %s\n", path)
 		return nil
 	}
 
