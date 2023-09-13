@@ -11,8 +11,10 @@ import (
 	_ "fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	opensearch "github.com/opensearch-project/opensearch-go/v2"
+	opensearchapi "github.com/opensearch-project/opensearch-go/v2/opensearchapi"
 	"github.com/sfomuseum/go-flags/flagset"
 	"github.com/sfomuseum/go-flags/multi"
 	"github.com/sfomuseum/go-whosonfirst-opensearch/document"
@@ -57,6 +59,26 @@ func main() {
 	}
 
 	// create index here...
+
+	settings := strings.NewReader(`{
+    'settings': {
+        'index': {
+            'number_of_shards': 1,
+            'number_of_replicas': 0
+            }
+        }
+    }`)
+
+	req := opensearchapi.IndicesCreateRequest{
+		Index: os_index,
+		Body:  settings,
+	}
+
+	_, err = req.Do(context.Background(), client)
+
+	if err != nil {
+		log.Fatalf("Error getting response: %s", err)
+	}
 
 	prepare_funcs := make([]document.PrepareDocumentFunc, 0)
 	prepare_funcs = append(prepare_funcs, document.AppendSpelunkerV1Properties)
