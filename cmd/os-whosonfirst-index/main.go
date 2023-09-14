@@ -7,14 +7,17 @@ import (
 import (
 	"context"
 	"crypto/tls"
-	_ "encoding/json"
+	"encoding/json"
 	_ "fmt"
 	"log"
 	"net/http"
-	"strings"
+	"os"
+	//	"strings"
+	"time"
 
 	opensearch "github.com/opensearch-project/opensearch-go/v2"
-	opensearchapi "github.com/opensearch-project/opensearch-go/v2/opensearchapi"
+	// opensearchapi "github.com/opensearch-project/opensearch-go/v2/opensearchapi"
+	opensearchutil "github.com/opensearch-project/opensearch-go/v2/opensearchutil"
 	"github.com/sfomuseum/go-flags/flagset"
 	"github.com/sfomuseum/go-flags/multi"
 	"github.com/sfomuseum/go-whosonfirst-opensearch/document"
@@ -26,19 +29,23 @@ func main() {
 	var os_index string
 	var os_user string
 	var os_pswd string
+	var os_endpoint string
 	var iterator_uri string
 	var iterator_paths multi.MultiString
 
 	var index_alt_files bool
+	var workers int
 
 	fs := flagset.NewFlagSet("opensearch")
 	fs.StringVar(&os_index, "opensearch-index", "", "...")
 	fs.StringVar(&os_user, "opensearch-user", "", "...")
 	fs.StringVar(&os_pswd, "opensearch-password", "", "...")
 
+	fs.StringVar(&os_endpoint, "opensearch-endpoint", "http://localhost:9200", "...")
 	fs.StringVar(&iterator_uri, "iterator-uri", "repo://", "...")
 	fs.Var(&iterator_paths, "iterator-path", "...")
 
+	fs.IntVar(&workers, "workers", 10, "...")
 	fs.BoolVar(&index_alt_files, "index-alt-files", false, "...")
 
 	flagset.Parse(fs)
@@ -49,9 +56,11 @@ func main() {
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // For testing only. Use certificate for validation.
 		},
-		Addresses: []string{"https://localhost:9202"},
-		Username:  os_user,
-		Password:  os_pswd,
+		Addresses: []string{
+			os_endpoint,
+		},
+		Username: os_user,
+		Password: os_pswd,
 	})
 
 	if err != nil {
@@ -60,6 +69,7 @@ func main() {
 
 	// create index here...
 
+/*
 	settings := strings.NewReader(`{
     'settings': {
         'index': {
@@ -77,14 +87,28 @@ func main() {
 	_, err = req.Do(context.Background(), client)
 
 	if err != nil {
-		log.Fatalf("Error getting response: %s", err)
+		log.Fatalf("Failed to create index '%s' w/ %s: %v", os_index, os_endpoint, err)
 	}
+*/
 
 	prepare_funcs := make([]document.PrepareDocumentFunc, 0)
 	prepare_funcs = append(prepare_funcs, document.AppendSpelunkerV1Properties)
 
-	opts := &index.RunBulkIndexerOptions{
+	bi_cfg := opensearchutil.BulkIndexerConfig{
+		Index:         os_index,
 		Client:        client,
+		NumWorkers:    workers,
+		FlushInterval: 30 * time.Second,
+	}
+
+	bi, err := opensearchutil.NewBulkIndexer(bi_cfg)
+
+	if err != nil {
+		log.Fatalf("Failed to create bulk indexer, %v", err)
+	}
+
+	opts := &index.RunBulkIndexerOptions{
+		BulkIndexer:   bi,
 		Index:         os_index,
 		IteratorURI:   iterator_uri,
 		IteratorPaths: iterator_paths,
@@ -92,9 +116,16 @@ func main() {
 		PrepareFuncs:  prepare_funcs,
 	}
 
-	err = index.RunBulkIndexer(ctx, opts)
+	stats, err := index.RunBulkIndexer(ctx, opts)
 
 	if err != nil {
 		log.Fatalf("Failed to run bulk tool, %v", err)
+	}
+
+	enc := json.Encoder(os.Stdout)
+	err = enc.Encode(stats)
+
+	if err != nil {
+		log.Fatalf("Failed to encode stats, %v", err)
 	}
 }

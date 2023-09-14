@@ -1,16 +1,18 @@
 package index
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
 	"io"
-	_ "log"
+	"log"
 	"strconv"
+	"time"
 
-	opensearchapi "github.com/opensearch-project/opensearch-go/v2/opensearchapi"
+	// opensearchapi "github.com/opensearch-project/opensearch-go/v2/opensearchapi"
 	opensearchutil "github.com/opensearch-project/opensearch-go/v2/opensearchutil"
 	"github.com/sfomuseum/go-flags/lookup"
 	"github.com/sfomuseum/go-whosonfirst-opensearch/document"
@@ -30,8 +32,8 @@ const FLAG_WORKERS string = "workers"
 // type RunBulkIndexerOptions contains runtime configurations for bulk indexing
 type RunBulkIndexerOptions struct {
 	// BulkIndexer is a `opensearch.Transport` instance
-	Client opensearchapi.Transport
-	Index  string
+	BulkIndexer opensearchutil.BulkIndexer
+	Index       string
 	// PrepareFuncs are one or more `document.PrepareDocumentFunc` used to transform a document before indexing
 	PrepareFuncs []document.PrepareDocumentFunc
 	// IteratorURI is a valid `whosonfirst/go-whosonfirst-iterate/v2` URI string.
@@ -95,20 +97,16 @@ func PrepareFuncsFromFlagSet(ctx context.Context, fs *flag.FlagSet) ([]document.
 }
 
 // RunBulkIndexer will "bulk" index a set of Who's On First documents with configuration details defined in 'opts'.
-func RunBulkIndexer(ctx context.Context, opts *RunBulkIndexerOptions) error {
+func RunBulkIndexer(ctx context.Context, opts *RunBulkIndexerOptions) (*opensearchutil.BulkIndexerStats, error) {
 
-	os_client := opts.Client
-	os_index := opts.Index
+	t1 := time.Now()
+
+	bi := opts.BulkIndexer
 
 	prepare_funcs := opts.PrepareFuncs
 	iterator_uri := opts.IteratorURI
 	iterator_paths := opts.IteratorPaths
 	index_alt := opts.IndexAltFiles
-
-	mu := new(sync.RWMutex)
-
-	docs := make([]interface{})
-	max_docs := 1000
 
 	iter_cb := func(ctx context.Context, path string, fh io.ReadSeeker, args ...interface{}) error {
 
@@ -162,33 +160,55 @@ func RunBulkIndexer(ctx context.Context, opts *RunBulkIndexerOptions) error {
 			return errors.New(msg)
 		}
 
-		mu.Lock()
-		defer mu.Unlock()
+		enc_f, err := json.Marshal(f)
 
-		docs = append(docs, f)
-
-		if len(docs) < max_docs {
-			return nil
+		if err != nil {
+			msg := fmt.Sprintf("Failed to marshal %s, %v", path, err)
+			return errors.New(msg)
 		}
 
 		// https://forum.opensearch.org/t/opensearch-go-bulk-request/9190
 		// https://github.com/opensearch-project/opensearch-go/blob/1.1/opensearchutil/bulk_indexer.go
 
-		/*
-		req := opensearchapi.IndexRequest{
-			Index:      os_index,
+		bulk_item := opensearchutil.BulkIndexerItem{
+			Index:      opts.Index,
+			Action:     "index",
 			DocumentID: doc_id,
-			Body:       opensearchutil.NewJSONReader(&f),
+			Body:       bytes.NewReader(enc_f),
+
+			OnSuccess: func(ctx context.Context, item opensearchutil.BulkIndexerItem, res opensearchutil.BulkIndexerResponseItem) {
+				// log.Printf("Indexed %s\n", path)
+			},
+
+			OnFailure: func(ctx context.Context, item opensearchutil.BulkIndexerItem, res opensearchutil.BulkIndexerResponseItem, err error) {
+				if err != nil {
+					log.Printf("ERROR: Failed to index %s, %s", path, err)
+				} else {
+					log.Printf("ERROR: Failed to index %s, %s: %s", path, res.Error.Type, res.Error.Reason)
+				}
+			},
 		}
 
-		_, err = req.Do(ctx, os_client)
+		err = bi.Add(ctx, bulk_item)
 
 		if err != nil {
-			return fmt.Errorf("Failed to index %d, %w", doc_id, err)
+			log.Printf("Failed to schedule %s, %v", path, err)
+			return nil
 		}
-		*/
 
-		docs = make([]interface{}, 0)
+		/*
+			req := opensearchapi.IndexRequest{
+				Index:      os_index,
+				DocumentID: doc_id,
+				Body:       opensearchutil.NewJSONReader(&f),
+			}
+
+			_, err = req.Do(ctx, os_client)
+
+			if err != nil {
+				return fmt.Errorf("Failed to index %d, %w", doc_id, err)
+			}
+		*/
 
 		// log.Printf("Indexed %s\n", path)
 		return nil
@@ -197,14 +217,24 @@ func RunBulkIndexer(ctx context.Context, opts *RunBulkIndexerOptions) error {
 	iter, err := iterator.NewIterator(ctx, iterator_uri, iter_cb)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = iter.IterateURIs(ctx, iterator_paths...)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	err = bi.Close(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	log.Printf("Processed %d files in %v\n", iter.Seen, time.Since(t1))
+
+	stats := bi.Stats()
+	return &stats, nil
+
 }
