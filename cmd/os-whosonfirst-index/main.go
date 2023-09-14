@@ -8,15 +8,14 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
-	_ "fmt"
 	"log"
 	"net/http"
 	"os"
-	//	"strings"
+	"strings"
 	"time"
 
 	opensearch "github.com/opensearch-project/opensearch-go/v2"
-	// opensearchapi "github.com/opensearch-project/opensearch-go/v2/opensearchapi"
+	opensearchapi "github.com/opensearch-project/opensearch-go/v2/opensearchapi"
 	opensearchutil "github.com/opensearch-project/opensearch-go/v2/opensearchutil"
 	"github.com/sfomuseum/go-flags/flagset"
 	"github.com/sfomuseum/go-flags/multi"
@@ -30,6 +29,8 @@ func main() {
 	var os_user string
 	var os_pswd string
 	var os_endpoint string
+	var os_insecure bool
+
 	var iterator_uri string
 	var iterator_paths multi.MultiString
 
@@ -40,8 +41,9 @@ func main() {
 	fs.StringVar(&os_index, "opensearch-index", "", "...")
 	fs.StringVar(&os_user, "opensearch-user", "", "...")
 	fs.StringVar(&os_pswd, "opensearch-password", "", "...")
+	fs.BoolVar(&os_insecure, "opensearch-insecure", false, "...")
 
-	fs.StringVar(&os_endpoint, "opensearch-endpoint", "http://localhost:9200", "...")
+	fs.StringVar(&os_endpoint, "opensearch-endpoint", "https://localhost:9200", "...")
 	fs.StringVar(&iterator_uri, "iterator-uri", "repo://", "...")
 	fs.Var(&iterator_paths, "iterator-path", "...")
 
@@ -54,7 +56,9 @@ func main() {
 
 	client, err := opensearch.NewClient(opensearch.Config{
 		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // For testing only. Use certificate for validation.
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: os_insecure,
+			},
 		},
 		Addresses: []string{
 			os_endpoint,
@@ -69,7 +73,6 @@ func main() {
 
 	// create index here...
 
-/*
 	settings := strings.NewReader(`{
     'settings': {
         'index': {
@@ -89,7 +92,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create index '%s' w/ %s: %v", os_index, os_endpoint, err)
 	}
-*/
 
 	prepare_funcs := make([]document.PrepareDocumentFunc, 0)
 	prepare_funcs = append(prepare_funcs, document.AppendSpelunkerV1Properties)
