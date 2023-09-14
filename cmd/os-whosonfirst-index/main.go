@@ -122,7 +122,7 @@ func main() {
 		log.Fatalf("Failed to run bulk tool, %v", err)
 	}
 
-	enc := json.Encoder(os.Stdout)
+	enc := json.NewEncoder(os.Stdout)
 	err = enc.Encode(stats)
 
 	if err != nil {
