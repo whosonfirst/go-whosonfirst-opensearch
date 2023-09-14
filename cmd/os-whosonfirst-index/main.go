@@ -94,7 +94,7 @@ func main() {
 	}
 
 	prepare_funcs := make([]document.PrepareDocumentFunc, 0)
-	prepare_funcs = append(prepare_funcs, document.AppendSpelunkerV1Properties)
+	prepare_funcs = append(prepare_funcs, document.PrepareSpelunkerV1Document)
 
 	bi_cfg := opensearchutil.BulkIndexerConfig{
 		Index:         os_index,

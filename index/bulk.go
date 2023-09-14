@@ -167,6 +167,8 @@ func RunBulkIndexer(ctx context.Context, opts *RunBulkIndexerOptions) (*opensear
 			return errors.New(msg)
 		}
 
+		// log.Println(string(enc_f))
+
 		// https://forum.opensearch.org/t/opensearch-go-bulk-request/9190
 		// https://github.com/opensearch-project/opensearch-go/blob/1.1/opensearchutil/bulk_indexer.go
 
