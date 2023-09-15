@@ -15,15 +15,26 @@ import (
 	requestsigner "github.com/opensearch-project/opensearch-go/v2/signer/awsv2"
 )
 
+// ClientOptions is a struct definining properties used to create a new `opensearch.Client` instance
+// using the `NewClient` method.
 type ClientOptions struct {
+	// A list of valid Opensearch endpoint URIs
 	Addresses         []string
+	// Disable TLS verification checks
 	Insecure          bool
+	// A valid Opensearch username
 	Username          string
+	// A valid Opensearch password	
 	Password          string
+	// AWSCredentialsURI is a valid `aaronland/go-aws-auth` URI
 	AWSCredentialsURI string
+	// Enable debugging for Opensearch requests
 	Debug             bool
 }
 
+// NewClient is an opinionated method for returning a new `opensearch.Client` instance using a `ClientOptions`
+// for configuring basic settings for common Opensearch clients. If this method doesn't do what you need it to
+// it may make more to create a new client from scratch.
 func NewClient(ctx context.Context, opts *ClientOptions) (*opensearch.Client, error) {
 
 	retry := backoff.NewExponentialBackOff()
