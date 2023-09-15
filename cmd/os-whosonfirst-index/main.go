@@ -27,8 +27,8 @@ func main() {
 	var os_username string
 	var os_password string
 	var os_aws_uri string
-	var os_endpoint string
 	var os_insecure bool
+	var os_addresses multi.MultiString
 
 	var iterator_uri string
 	var iterator_paths multi.MultiString
@@ -43,7 +43,7 @@ func main() {
 	fs.StringVar(&os_aws_uri, "opensearch-aws-uri", "", "...")
 	fs.StringVar(&os_password, "opensearch-password", "", "...")
 	fs.BoolVar(&os_insecure, "opensearch-insecure", false, "...")
-	fs.StringVar(&os_endpoint, "opensearch-endpoint", "https://localhost:9200", "...")
+	fs.Var(&os_addresses, "opensearch-endpoint", "...")
 
 	fs.StringVar(&iterator_uri, "iterator-uri", "repo://", "...")
 	fs.Var(&iterator_paths, "iterator-path", "...")
@@ -56,9 +56,7 @@ func main() {
 	ctx := context.Background()
 
 	os_client_opts := &wof_opensearch.ClientOptions{
-		Addresses: []string{
-			os_endpoint,
-		},
+		Addresses:         os_addresses,
 		Insecure:          os_insecure,
 		Username:          os_username,
 		Password:          os_password,
@@ -71,7 +69,7 @@ func main() {
 		log.Fatalf("Failed to create Opensearch client, %v", err)
 	}
 
-	// create index here...
+	// START OF move me in to a function in index.go
 
 	settings := strings.NewReader(`{
     'settings': {
@@ -90,8 +88,10 @@ func main() {
 	_, err = req.Do(context.Background(), os_client)
 
 	if err != nil {
-		log.Fatalf("Failed to create index '%s' w/ %s: %v", os_index, os_endpoint, err)
+		log.Fatalf("Failed to create index '%s', %v", os_index, err)
 	}
+
+	// END OF move me in to a function in index.go
 
 	prepare_funcs := make([]document.PrepareDocumentFunc, 0)
 	prepare_funcs = append(prepare_funcs, document.PrepareSpelunkerV1Document)
