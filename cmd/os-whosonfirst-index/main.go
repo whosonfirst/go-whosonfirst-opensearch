@@ -6,21 +6,17 @@ import (
 
 import (
 	"context"
-	"crypto/tls"
 	"encoding/json"
 	"log"
-	"net/http"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/aaronland/go-aws-auth"
-	opensearch "github.com/opensearch-project/opensearch-go/v2"
 	opensearchapi "github.com/opensearch-project/opensearch-go/v2/opensearchapi"
 	opensearchutil "github.com/opensearch-project/opensearch-go/v2/opensearchutil"
-	requestsigner "github.com/opensearch-project/opensearch-go/v2/signer/awsv2"
 	"github.com/sfomuseum/go-flags/flagset"
 	"github.com/sfomuseum/go-flags/multi"
+	wof_opensearch "github.com/sfomuseum/go-whosonfirst-opensearch"
 	"github.com/sfomuseum/go-whosonfirst-opensearch/document"
 	"github.com/sfomuseum/go-whosonfirst-opensearch/index"
 )
@@ -28,8 +24,8 @@ import (
 func main() {
 
 	var os_index string
-	var os_user string
-	var os_pswd string
+	var os_username string
+	var os_password string
 	var os_aws_uri string
 	var os_endpoint string
 	var os_insecure bool
@@ -43,9 +39,9 @@ func main() {
 	fs := flagset.NewFlagSet("opensearch")
 
 	fs.StringVar(&os_index, "opensearch-index", "", "...")
-	fs.StringVar(&os_user, "opensearch-user", "", "...")
+	fs.StringVar(&os_username, "opensearch-username", "", "...")
 	fs.StringVar(&os_aws_uri, "opensearch-aws-uri", "", "...")
-	fs.StringVar(&os_pswd, "opensearch-password", "", "...")
+	fs.StringVar(&os_password, "opensearch-password", "", "...")
 	fs.BoolVar(&os_insecure, "opensearch-insecure", false, "...")
 	fs.StringVar(&os_endpoint, "opensearch-endpoint", "https://localhost:9200", "...")
 
@@ -59,43 +55,20 @@ func main() {
 
 	ctx := context.Background()
 
-	os_cfg := opensearch.Config{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: os_insecure,
-			},
-		},
+	os_client_opts := &wof_opensearch.ClientOptions{
 		Addresses: []string{
 			os_endpoint,
 		},
+		Insecure:          os_insecure,
+		Username:          os_username,
+		Password:          os_password,
+		AWSCredentialsURI: os_aws_uri,
 	}
 
-	if os_aws_uri != "" {
-
-		aws_cfg, err := auth.NewConfig(ctx, os_aws_uri)
-
-		if err != nil {
-			log.Fatalf("Failed to create new AWS config, %v", err)
-		}
-
-		signer, err := requestsigner.NewSignerWithService(aws_cfg, "es")
-
-		if err != nil {
-			log.Fatalf("Failed to create request signer, %v", err)
-		}
-
-		os_cfg.Signer = signer
-
-	} else {
-
-		os_cfg.Username = os_user
-		os_cfg.Password = os_pswd
-	}
-
-	client, err := opensearch.NewClient(os_cfg)
+	os_client, err := wof_opensearch.NewClient(ctx, os_client_opts)
 
 	if err != nil {
-		log.Fatalf("Failed to create client, %w", err)
+		log.Fatalf("Failed to create Opensearch client, %v", err)
 	}
 
 	// create index here...
@@ -114,7 +87,7 @@ func main() {
 		Body:  settings,
 	}
 
-	_, err = req.Do(context.Background(), client)
+	_, err = req.Do(context.Background(), os_client)
 
 	if err != nil {
 		log.Fatalf("Failed to create index '%s' w/ %s: %v", os_index, os_endpoint, err)
@@ -125,7 +98,7 @@ func main() {
 
 	bi_cfg := opensearchutil.BulkIndexerConfig{
 		Index:         os_index,
-		Client:        client,
+		Client:        os_client,
 		NumWorkers:    workers,
 		FlushInterval: 30 * time.Second,
 	}

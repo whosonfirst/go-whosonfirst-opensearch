@@ -2,11 +2,6 @@ module github.com/sfomuseum/go-whosonfirst-opensearch
 
 go 1.21
 
-// Note that elastic/go-elasticsearch/v7 v7.13.0 is the last version known to work with AWS
-// Elasticsearch instances. v7.14.0 and higher will fail with this error message:
-// "the client noticed that the server is not a supported distribution of Elasticsearch"
-// Good times...
-
 require (
 	github.com/aaronland/go-aws-auth v1.1.1
 	github.com/opensearch-project/opensearch-go/v2 v2.3.0
