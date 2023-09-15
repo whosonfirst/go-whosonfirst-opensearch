@@ -1,10 +1,9 @@
-# go-whosonfirst-elasticsearch
-
-Go package for indexing Who's On First records in Elasticsearch.
+# go-whosonfirst-opensearch
+Go package for indexing Who's On First records in Opensearch.
 
 ## Documentation
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/sfomuseum/go-whosonfirst-elasticsearch.svg)](https://pkg.go.dev/github.com/sfomuseum/go-whosonfirst-elasticsearch)
+[![Go Reference](https://pkg.go.dev/badge/github.com/sfomuseum/go-whosonfirst-opensearch.svg)](https://pkg.go.dev/github.com/sfomuseum/go-whosonfirst-opensearch)
 
 ## Tools
 
@@ -12,19 +11,19 @@ To build binary versions of these tools run the `cli` Makefile target. For examp
 
 ```
 $> make cli
-go build -mod vendor -o bin/es-whosonfirst-index cmd/es-whosonfirst-index/main.go
+go build -mod vendor -o bin/wof-opensearch-index cmd/wof-opensearch-index/main.go
 ```
 
-### es-whosonfirst-index
+### wof-opensearch-index
 
 ```
-$> ./bin/es-whosonfirst-index -h
+$> ./bin/wof-opensearch-index -h
   -append-spelunker-v1-properties
 	Append and index auto-generated Whos On First Spelunker properties.
-  -elasticsearch-endpoint string
-    			  A fully-qualified Elasticsearch endpoint. (default "http://localhost:9200")
-  -elasticsearch-index string
-    		       A valid Elasticsearch index. (default "millsfield")
+  -opensearch-endpoint string
+    			  A fully-qualified Opensearch endpoint. (default "http://localhost:9200")
+  -opensearch-index string
+    		       A valid Opensearch index. (default "millsfield")
   -index-alt-files
 	Index alternate geometries.
   -index-only-properties
@@ -40,9 +39,9 @@ $> ./bin/es-whosonfirst-index -h
 For example:
 
 ```
-$> bin/es-whosonfirst-index \
+$> bin/wof-opensearch-index \
 	-index-spelunker-v1
-	-elasticsearch-index whosonfirst \
+	-opensearch-index whosonfirst \
 	/usr/local/data/whosonfirst-data-admin-ca
 ```
 
@@ -52,12 +51,12 @@ $> bin/es-whosonfirst-index \
 
 * Support for generating `date:` properties derived from `edtf:` property values is currently not available. This is currently blocked on the lack of a Go language `Extended DateTime Format` parser.
 
-## Elasticsearch
+## Opensearch
 
-This code assumes Elasticsearch 7.x
+This code assumes Opensearch 2.x
 
 ## See also
 
-* https://github.com/elastic/go-elasticsearch
+* https://github.com/whosonfirst/go-whosonfirst-elasticsearch
 * https://github.com/whosonfirst/go-whosonfirst-iterate
 * https://github.com/whosonfirst/go-whosonfirst-iterate-git
