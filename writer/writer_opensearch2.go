@@ -15,10 +15,10 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
-	opensearch "github.com/elastic/go-opensearch/v2"
-	"github.com/elastic/go-opensearch/v2/opensearchapi"
-	"github.com/elastic/go-opensearch/v2/opensearchtransport"
-	"github.com/elastic/go-opensearch/v2/opensearchutil"
+	opensearch "github.com/opensearch-project/opensearch-go/v2"
+	"github.com/opensearch-project/opensearch-go/v2/opensearchapi"
+	"github.com/opensearch-project/opensearch-go/v2/opensearchtransport"
+	"github.com/opensearch-project/opensearch-go/v2/opensearchutil"
 	"github.com/whosonfirst/go-whosonfirst-elasticsearch/document"
 	"github.com/whosonfirst/go-whosonfirst-feature/properties"
 	wof_writer "github.com/whosonfirst/go-writer/v3"
@@ -27,11 +27,11 @@ import (
 func init() {
 	ctx := context.Background()
 	wof_writer.RegisterWriter(ctx, "opensearch", NewOpensearchV2Writer)
-	wof_writer.RegisterWriter(ctx, "opensearch7", NewOpensearchV2Writer)
+	wof_writer.RegisterWriter(ctx, "opensearch2", NewOpensearchV2Writer)
 }
 
 // OpensearchV2Writer is a struct that implements the `Writer` interface for writing documents to an Opensearch
-// index using the github.com/elastic/go-opensearch/v2 package.
+// index using the github.com/opensearch-project/opensearch-go/v2 package.
 type OpensearchV2Writer struct {
 	wof_writer.Writer
 	client          *opensearch.Client
@@ -44,11 +44,11 @@ type OpensearchV2Writer struct {
 }
 
 // NewOpensearchV2Writer returns a new `OpensearchV2Writer` instance for writing documents to an
-// Opensearch index using the github.com/elastic/go-opensearch/v2 package configured by 'uri' which
+// Opensearch index using the github.com/opensearch-project/opensearch-go/v2 package configured by 'uri' which
 // is expected to take the form of:
 //
 //	opensearch://{HOST}:{PORT}/{INDEX}?{QUERY_PARAMETERS}
-//	opensearch7://{HOST}:{PORT}/{INDEX}?{QUERY_PARAMETERS}
+//	opensearch2://{HOST}:{PORT}/{INDEX}?{QUERY_PARAMETERS}
 //
 // Where {QUERY_PARAMETERS} may be one or more of the following:
 // * ?debug={BOOLEAN}. If true then verbose Opensearch logging for requests and responses will be enabled. Default is false.
