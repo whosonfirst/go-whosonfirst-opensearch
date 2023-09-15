@@ -18,7 +18,7 @@ import (
 	"github.com/opensearch-project/opensearch-go/v2/opensearchutil"
 	"github.com/whosonfirst/go-whosonfirst-elasticsearch/document"
 	"github.com/whosonfirst/go-whosonfirst-feature/properties"
-	wof_opensearch "github.com/whosonfirst/go-whosonfirst-opensearch"
+	wof_client "github.com/whosonfirst/go-whosonfirst-opensearch/client"
 	wof_writer "github.com/whosonfirst/go-writer/v3"
 )
 
@@ -84,7 +84,7 @@ func NewOpensearchV2Writer(ctx context.Context, uri string) (wof_writer.Writer, 
 	q_password := q.Get("password") // update to use go-runtime
 	q_aws_credentials_uri := q.Get("aws-credentials-uri")
 
-	os_client_opts := &wof_opensearch.ClientOptions{
+	os_client_opts := &wof_client.ClientOptions{
 		Addresses:         []string{opensearch_endpoint},
 		Username:          q_username,
 		Password:          q_password,
@@ -113,7 +113,7 @@ func NewOpensearchV2Writer(ctx context.Context, uri string) (wof_writer.Writer, 
 		os_client_opts.Insecure = insecure
 	}
 
-	os_client, err := wof_opensearch.NewClient(ctx, os_client_opts)
+	os_client, err := wof_client.NewClient(ctx, os_client_opts)
 
 	if err != nil {
 		return nil, fmt.Errorf("Failed to create ES client, %w", err)

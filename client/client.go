@@ -1,4 +1,3 @@
-// Package client will eventually replace go-whosonfirst-opensearch/client.go but it is not quite ready yet.
 package client
 
 import (
