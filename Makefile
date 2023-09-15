@@ -1,3 +1,4 @@
+GOMOD=$(shell test -f "go.work" && echo "readonly" || echo "vendor")
+
 cli:
-	go build -mod vendor -o bin/es-whosonfirst-index cmd/es-whosonfirst-index/main.go
-	go build -mod vendor -o bin/es2-whosonfirst-index cmd/es2-whosonfirst-index/main.go
+	go build -mod $(GOMOD) -ldflags="-s -w" -o bin/wof-index-opensearch cmd/wof-index-opensearch/main.go

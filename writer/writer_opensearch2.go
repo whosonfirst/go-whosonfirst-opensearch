@@ -82,7 +82,7 @@ func NewOpensearchV2Writer(ctx context.Context, uri string) (wof_writer.Writer, 
 	q_insecure := q.Get("insecure")	
 	q_username := q.Get("username")
 	q_password := q.Get("password")	// update to use go-runtime
-	q_credentials_uri := q.Get("aws-credentials-uri")
+	q_aws_credentials_uri := q.Get("aws-credentials-uri")
 	
 	os_client_opts := &wof_opensearch.ClientOptions{
 		Addresses: []string{opensearch_endpoint},
