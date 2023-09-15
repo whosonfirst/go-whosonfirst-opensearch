@@ -1,10 +1,10 @@
-package opensearch
-
-// This will eventually be replaced by client/client.go but we're not quite there yet.
+// Package client will eventually replace go-whosonfirst-opensearch/client.go but it is not quite ready yet.
+package client
 
 import (
 	"context"
 	"crypto/tls"
+	"flag"
 	"fmt"
 	"net/http"
 	"os"
@@ -32,6 +32,21 @@ type ClientOptions struct {
 	AWSCredentialsURI string
 	// Enable debugging for Opensearch requests
 	Debug bool
+}
+
+func NewClientFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*opensearch.Client, error) {
+
+	os_client_opts := &ClientOptions{
+		Addresses: []string{
+			os_endpoint,
+		},
+		Insecure:          os_insecure,
+		Username:          os_username,
+		Password:          os_password,
+		AWSCredentialsURI: os_aws_uri,
+	}
+
+	return NewClient(ctx, os_client_opts)
 }
 
 // NewClient is an opinionated method for returning a new `opensearch.Client` instance using a `ClientOptions`
