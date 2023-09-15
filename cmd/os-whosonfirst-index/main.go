@@ -14,9 +14,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aaronland/go-aws-auth"
 	opensearch "github.com/opensearch-project/opensearch-go/v2"
 	opensearchapi "github.com/opensearch-project/opensearch-go/v2/opensearchapi"
 	opensearchutil "github.com/opensearch-project/opensearch-go/v2/opensearchutil"
+	requestsigner "github.com/opensearch-project/opensearch-go/v2/signer/awsv2"
 	"github.com/sfomuseum/go-flags/flagset"
 	"github.com/sfomuseum/go-flags/multi"
 	"github.com/sfomuseum/go-whosonfirst-opensearch/document"
@@ -28,6 +30,7 @@ func main() {
 	var os_index string
 	var os_user string
 	var os_pswd string
+	var os_aws_uri string
 	var os_endpoint string
 	var os_insecure bool
 
@@ -38,12 +41,14 @@ func main() {
 	var workers int
 
 	fs := flagset.NewFlagSet("opensearch")
+
 	fs.StringVar(&os_index, "opensearch-index", "", "...")
 	fs.StringVar(&os_user, "opensearch-user", "", "...")
+	fs.StringVar(&os_aws_uri, "opensearch-aws-uri", "", "...")
 	fs.StringVar(&os_pswd, "opensearch-password", "", "...")
 	fs.BoolVar(&os_insecure, "opensearch-insecure", false, "...")
-
 	fs.StringVar(&os_endpoint, "opensearch-endpoint", "https://localhost:9200", "...")
+
 	fs.StringVar(&iterator_uri, "iterator-uri", "repo://", "...")
 	fs.Var(&iterator_paths, "iterator-path", "...")
 
@@ -54,7 +59,7 @@ func main() {
 
 	ctx := context.Background()
 
-	client, err := opensearch.NewClient(opensearch.Config{
+	os_cfg := opensearch.Config{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: os_insecure,
@@ -63,9 +68,31 @@ func main() {
 		Addresses: []string{
 			os_endpoint,
 		},
-		Username: os_user,
-		Password: os_pswd,
-	})
+	}
+
+	if os_aws_uri != "" {
+
+		aws_cfg, err := auth.NewConfig(ctx, os_aws_uri)
+
+		if err != nil {
+			log.Fatalf("Failed to create new AWS config, %v", err)
+		}
+
+		signer, err := requestsigner.NewSignerWithService(aws_cfg, "es")
+
+		if err != nil {
+			log.Fatalf("Failed to create request signer, %v", err)
+		}
+
+		os_cfg.Signer = signer
+
+	} else {
+
+		os_cfg.Username = os_user
+		os_cfg.Password = os_pswd
+	}
+
+	client, err := opensearch.NewClient(os_cfg)
 
 	if err != nil {
 		log.Fatalf("Failed to create client, %w", err)
