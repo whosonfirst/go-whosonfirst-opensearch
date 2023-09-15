@@ -15,7 +15,7 @@ import (
 	// opensearchapi "github.com/opensearch-project/opensearch-go/v2/opensearchapi"
 	opensearchutil "github.com/opensearch-project/opensearch-go/v2/opensearchutil"
 	"github.com/sfomuseum/go-flags/lookup"
-	"github.com/sfomuseum/go-whosonfirst-opensearch/document"
+	"github.com/whosonfirst/go-whosonfirst-opensearch/document"
 	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-whosonfirst-iterate/v2/iterator"
 )

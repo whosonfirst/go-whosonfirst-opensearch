@@ -16,9 +16,9 @@ import (
 	opensearchutil "github.com/opensearch-project/opensearch-go/v2/opensearchutil"
 	"github.com/sfomuseum/go-flags/flagset"
 	"github.com/sfomuseum/go-flags/multi"
-	wof_opensearch "github.com/sfomuseum/go-whosonfirst-opensearch"
-	"github.com/sfomuseum/go-whosonfirst-opensearch/document"
-	"github.com/sfomuseum/go-whosonfirst-opensearch/index"
+	wof_opensearch "github.com/whosonfirst/go-whosonfirst-opensearch"
+	"github.com/whosonfirst/go-whosonfirst-opensearch/document"
+	"github.com/whosonfirst/go-whosonfirst-opensearch/index"
 )
 
 func main() {
