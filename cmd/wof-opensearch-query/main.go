@@ -2,9 +2,10 @@ package main
 
 import (
 	"context"
-	"encoding/json"
+	"io"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/opensearch-project/opensearch-go/v2/opensearchapi"
 	"github.com/sfomuseum/go-flags/flagset"
@@ -49,11 +50,13 @@ func main() {
 		log.Fatalf("Failed to create opensearch client, %v", err)
 	}
 
+	q := strings.Join(fs.Args(), " ")
+
 	req := opensearchapi.SearchRequest{
 		Index: []string{
 			os_index,
 		},
-		Body: os.Stdin,
+		Body: strings.NewReader(q),
 	}
 
 	rsp, err := req.Do(ctx, os_client)
@@ -62,10 +65,23 @@ func main() {
 		log.Fatalf("Failed to perform query, %v", err)
 	}
 
-	enc := json.NewEncoder(os.Stdout)
-	err = enc.Encode(rsp)
+	defer rsp.Body.Close()
+
+	/*
+		if rsp.IsError(){
+			log.Fatalf("Query failed, %", rsp.Status())
+		}
+	*/
+
+	_, err = io.Copy(os.Stdout, rsp.Body)
 
 	if err != nil {
-		log.Fatalf("Failed to encode response, %v", err)
+		log.Fatalf("Failed to copy response, %v", err)
 	}
+
+	if rsp.IsError() {
+		os.Exit(1)
+	}
+
+	os.Exit(0)
 }
