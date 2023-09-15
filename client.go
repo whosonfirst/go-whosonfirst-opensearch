@@ -19,17 +19,17 @@ import (
 // using the `NewClient` method.
 type ClientOptions struct {
 	// A list of valid Opensearch endpoint URIs
-	Addresses         []string
+	Addresses []string
 	// Disable TLS verification checks
-	Insecure          bool
+	Insecure bool
 	// A valid Opensearch username
-	Username          string
-	// A valid Opensearch password	
-	Password          string
+	Username string
+	// A valid Opensearch password
+	Password string
 	// AWSCredentialsURI is a valid `aaronland/go-aws-auth` URI
 	AWSCredentialsURI string
 	// Enable debugging for Opensearch requests
-	Debug             bool
+	Debug bool
 }
 
 // NewClient is an opinionated method for returning a new `opensearch.Client` instance using a `ClientOptions`

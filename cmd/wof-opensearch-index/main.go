@@ -1,16 +1,16 @@
 package main
 
 import (
-	_ "github.com/whosonfirst/go-whosonfirst-opensearch/writer"
 	_ "github.com/whosonfirst/go-whosonfirst-iterate-git/v2"
 	_ "github.com/whosonfirst/go-whosonfirst-iterate-organization"
+	_ "github.com/whosonfirst/go-whosonfirst-opensearch/writer"
 )
 
 import (
 	"context"
 	"log"
 
-	"github.com/whosonfirst/go-whosonfirst-iterwriter/application/iterwriter"	
+	"github.com/whosonfirst/go-whosonfirst-iterwriter/application/iterwriter"
 )
 
 func main() {
