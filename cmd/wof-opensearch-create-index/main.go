@@ -5,7 +5,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/opensearch-project/opensearch-go/v2/opensearchapi"
 	"github.com/sfomuseum/go-flags/flagset"
@@ -20,6 +19,7 @@ func main() {
 	var os_aws_uri string
 	var os_endpoint string
 	var os_insecure bool
+	var settings string
 
 	fs := flagset.NewFlagSet("opensearch")
 
@@ -29,6 +29,7 @@ func main() {
 	fs.StringVar(&os_password, "opensearch-password", "", "...")
 	fs.BoolVar(&os_insecure, "opensearch-insecure", false, "...")
 	fs.StringVar(&os_endpoint, "opensearch-endpoint", "https://localhost:9200", "...")
+	fs.StringVar(&settings, "settings", "", "...")
 
 	flagset.Parse(fs)
 
@@ -50,20 +51,20 @@ func main() {
 		log.Fatalf("Failed to create Opensearch client, %v", err)
 	}
 
-	// START OF put me in a function in index.go
-
-	settings := strings.NewReader(`{
-    'settings': {
-        'index': {
-            'number_of_shards': 1,
-            'number_of_replicas': 0
-            }
-        }
-    }`)
-
 	req := opensearchapi.IndicesCreateRequest{
 		Index: os_index,
-		Body:  settings,
+	}
+
+	if settings != "" {
+
+		r, err := os.Open(settings)
+
+		if err != nil {
+			log.Fatalf("Failed to open settings for reading, %v", err)
+		}
+
+		defer r.Close()
+		req.Body = r
 	}
 
 	rsp, err := req.Do(context.Background(), os_client)
@@ -71,8 +72,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create index '%s' w/ %s: %v", os_index, os_endpoint, err)
 	}
-
-	// END OF put me in a function in index.go
 
 	defer rsp.Body.Close()
 
@@ -87,5 +86,4 @@ func main() {
 	}
 
 	os.Exit(0)
-
 }

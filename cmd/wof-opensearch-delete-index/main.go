@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"io"
 	"log"
+	"os"
 
 	"github.com/opensearch-project/opensearch-go/v2/opensearchapi"
 	"github.com/sfomuseum/go-flags/flagset"
@@ -53,10 +55,23 @@ func main() {
 		},
 	}
 
-	_, err = req.Do(context.Background(), os_client)
+	rsp, err := req.Do(context.Background(), os_client)
 
 	if err != nil {
 		log.Fatalf("Failed to delete index '%s' w/ %s: %v", os_index, os_endpoint, err)
 	}
 
+	defer rsp.Body.Close()
+
+	_, err = io.Copy(os.Stdout, rsp.Body)
+
+	if err != nil {
+		log.Fatalf("Failed to copy response, %v", err)
+	}
+
+	if rsp.IsError() {
+		os.Exit(1)
+	}
+
+	os.Exit(0)
 }
