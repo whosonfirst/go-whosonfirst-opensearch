@@ -8,19 +8,17 @@ import (
 	"io"
 	"log"
 	"net/url"
-	"os"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/cenkalti/backoff/v4"
 	opensearch "github.com/opensearch-project/opensearch-go/v2"
 	"github.com/opensearch-project/opensearch-go/v2/opensearchapi"
-	"github.com/opensearch-project/opensearch-go/v2/opensearchtransport"
 	"github.com/opensearch-project/opensearch-go/v2/opensearchutil"
 	"github.com/whosonfirst/go-whosonfirst-elasticsearch/document"
 	"github.com/whosonfirst/go-whosonfirst-feature/properties"
+	wof_opensearch "github.com/whosonfirst/go-whosonfirst-opensearch"
 	wof_writer "github.com/whosonfirst/go-writer/v3"
 )
 
@@ -77,44 +75,24 @@ func NewOpensearchV2Writer(ctx context.Context, uri string) (wof_writer.Writer, 
 
 	q := u.Query()
 
-	retry := backoff.NewExponentialBackOff()
+	q_debug := q.Get("debug")
 
-	opensearch_cfg := opensearch.Config{
-		Addropensearchsopensearch: []string{opensearch_endpoint},
-
-		RetryOnStatus: []int{502, 503, 504, 429},
-		RetryBackoff: func(i int) time.Duration {
-			if i == 1 {
-				retry.Reset()
-			}
-			return retry.NextBackOff()
-		},
-		MaxRetries: 5,
+	os_client_opts := &wof_opensearch.ClientOptions{
+		Addresses: []string{opensearch_endpoint},
 	}
 
-	str_debug := q.Get("debug")
+	if q_debug != "" {
 
-	if str_debug != "" {
-
-		debug, err := strconv.ParseBool(str_debug)
+		debug, err := strconv.ParseBool(q_debug)
 
 		if err != nil {
 			return nil, fmt.Errorf("Failed to parse ?debug= parameter, %w", err)
 		}
 
-		if debug {
-
-			opensearch_logger := &opensearchtransport.ColorLogger{
-				Output:             os.Stdout,
-				EnableRequestBody:  true,
-				EnableResponseBody: true,
-			}
-
-			opensearch_cfg.Logger = opensearch_logger
-		}
+		os_client_opts.Debug = debug
 	}
 
-	opensearch_client, err := opensearch.NewClient(opensearch_cfg)
+	os_client, err := wof_opensearch.NewClient(ctx, os_client_opts)
 
 	if err != nil {
 		return nil, fmt.Errorf("Failed to create ES client, %w", err)
@@ -125,7 +103,7 @@ func NewOpensearchV2Writer(ctx context.Context, uri string) (wof_writer.Writer, 
 	wg := new(sync.WaitGroup)
 
 	wr := &OpensearchV2Writer{
-		client:    opensearch_client,
+		client:    os_client,
 		index:     opensearch_index,
 		logger:    logger,
 		waitGroup: wg,
@@ -165,7 +143,7 @@ func NewOpensearchV2Writer(ctx context.Context, uri string) (wof_writer.Writer, 
 
 		bi_cfg := opensearchutil.BulkIndexerConfig{
 			Index:         opensearch_index,
-			Client:        opensearch_client,
+			Client:        os_client,
 			NumWorkers:    workers,
 			FlushInterval: 30 * time.Second,
 			OnError: func(context.Context, error) {

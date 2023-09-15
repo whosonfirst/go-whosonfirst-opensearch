@@ -5,9 +5,13 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/http"
+	"os"
+	"time"
 
 	"github.com/aaronland/go-aws-auth"
+	"github.com/cenkalti/backoff/v4"
 	opensearch "github.com/opensearch-project/opensearch-go/v2"
+	"github.com/opensearch-project/opensearch-go/v2/opensearchtransport"
 	requestsigner "github.com/opensearch-project/opensearch-go/v2/signer/awsv2"
 )
 
@@ -17,9 +21,12 @@ type ClientOptions struct {
 	Username          string
 	Password          string
 	AWSCredentialsURI string
+	Debug             bool
 }
 
 func NewClient(ctx context.Context, opts *ClientOptions) (*opensearch.Client, error) {
+
+	retry := backoff.NewExponentialBackOff()
 
 	os_cfg := opensearch.Config{
 		Transport: &http.Transport{
@@ -27,7 +34,26 @@ func NewClient(ctx context.Context, opts *ClientOptions) (*opensearch.Client, er
 				InsecureSkipVerify: opts.Insecure,
 			},
 		},
-		Addresses: opts.Addresses,
+		Addresses:     opts.Addresses,
+		RetryOnStatus: []int{502, 503, 504, 429},
+		RetryBackoff: func(i int) time.Duration {
+			if i == 1 {
+				retry.Reset()
+			}
+			return retry.NextBackOff()
+		},
+		MaxRetries: 5,
+	}
+
+	if opts.Debug {
+
+		opensearch_logger := &opensearchtransport.ColorLogger{
+			Output:             os.Stdout,
+			EnableRequestBody:  true,
+			EnableResponseBody: true,
+		}
+
+		os_cfg.Logger = opensearch_logger
 	}
 
 	if opts.AWSCredentialsURI != "" {
