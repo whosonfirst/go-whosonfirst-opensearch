@@ -67,12 +67,6 @@ func main() {
 
 	defer rsp.Body.Close()
 
-	/*
-		if rsp.IsError(){
-			log.Fatalf("Query failed, %", rsp.Status())
-		}
-	*/
-
 	_, err = io.Copy(os.Stdout, rsp.Body)
 
 	if err != nil {
