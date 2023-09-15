@@ -28,6 +28,8 @@ func main() {
 	fs.BoolVar(&os_insecure, "opensearch-insecure", false, "...")
 	fs.StringVar(&os_endpoint, "opensearch-endpoint", "https://localhost:9200", "...")
 
+	flagset.Parse(fs)
+
 	ctx := context.Background()
 
 	os_client_opts := &wof_opensearch.ClientOptions{
