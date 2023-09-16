@@ -23,7 +23,7 @@ Create a new OpenSearch index with optional settings and mappings.
 
 ```
 $> ./bin/wof-opensearch-create-index \
-	-opensearch-aws-uri 'aws://{REGION}?credentials=iam:' \
+	-opensearch-aws-credentials-uri 'aws://{REGION}?credentials=iam:' \
 	-opensearch-endpoint https://{OPENSEARCH_DOMAIN}.{REGION}.es.amazonaws.com \
 	-opensearch-index collection \
 	-settings /usr/local/sfomuseum/es-sfomuseum-schema/schema/7.4/mappings.collection.json
@@ -37,7 +37,7 @@ Delete an OpenSearch index.
 
 ```
 $> ./bin/wof-opensearch-delete-index \
-	-opensearch-aws-uri 'aws://{REGION}?credentials=iam:' \
+	-opensearch-aws-credentials-uri 'aws://{REGION}?credentials=iam:' \
 	-opensearch-endpoint https://{OPENSEARCH_DOMAIN}.{REGION}.es.amazonaws.com \
 	-opensearch-index collection \
 ```
@@ -64,7 +64,7 @@ Assign and update mappings in an OpenSearch index.
 
 ```
 $> ./bin/wof-opensearch-put-mapping \
-	-opensearch-aws-uri 'aws://{REGION}?credentials=iam:' \
+	-opensearch-aws-credentials-uri 'aws://{REGION}?credentials=iam:' \
 	-opensearch-endpoint https://{OPENSEARCH_DOMAIN}.{REGION}.es.amazonaws.com \
 	-opensearch-index collection \
 	-mapping mapping.json
@@ -76,7 +76,7 @@ Query an OpenSearch index.
 
 ```
 $> ./bin/wof-opensearch-query \
-	-opensearch-aws-uri 'aws://{REGION}?credentials=iam:' \
+	-opensearch-aws-credentials-uri 'aws://{REGION}?credentials=iam:' \
 	-opensearch-endpoint https://{OPENSEARCH_DOMAIN}.{REGION}.es.amazonaws.com \
 	-opensearch-index collection \
 	'{"query": { "ids": { "values": [ 1880245177 ] } } }'  | jq
