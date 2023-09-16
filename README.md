@@ -1,6 +1,6 @@
 # go-whosonfirst-opensearch
 
-Go package for indexing Who's On First records in Opensearch.
+Go package for indexing Who's On First records in OpenSearch.
 
 ## Documentation
 
@@ -19,7 +19,7 @@ go build -mod vendor -ldflags="-s -w" -o bin/wof-opensearch-put-mapping cmd/wof-
 
 ### wof-opensearch-create-index
 
-Create a new Opensearch index with optional settings and mappings.
+Create a new OpenSearch index with optional settings and mappings.
 
 ```
 $> ./bin/wof-opensearch-create-index \
@@ -33,7 +33,7 @@ $> ./bin/wof-opensearch-create-index \
 
 ### wof-opensearch-delete-index
 
-Delete an Opensearch index.
+Delete an OpenSearch index.
 
 ```
 $> ./bin/wof-opensearch-delete-index \
@@ -44,7 +44,7 @@ $> ./bin/wof-opensearch-delete-index \
 
 ### wof-opensearch-index
 
-Index one or more [whosonfirst/go-whosonfirst-iterate/v2](https://github.com/whosonfirst/go-whosonfirst-iterate) sources in an Opensearch index.
+Index one or more [whosonfirst/go-whosonfirst-iterate/v2](https://github.com/whosonfirst/go-whosonfirst-iterate) sources in an OpenSearch index.
 
 ```
 $> ./bin/wof-opensearch-index \
@@ -60,7 +60,7 @@ TBW. Have a look at [writer/writer_opensearch2.go](writer/writer_opensearch2.go)
 
 ### wof-opensearch-put-mapping
 
-Assign and update mappings in an Opensearch index.
+Assign and update mappings in an OpenSearch index.
 
 ```
 $> ./bin/wof-opensearch-put-mapping \
@@ -72,7 +72,7 @@ $> ./bin/wof-opensearch-put-mapping \
 
 ### wof-opensearch-query
 
-Query an Opensearch index.
+Query an OpenSearch index.
 
 ```
 $> ./bin/wof-opensearch-query \
@@ -179,3 +179,4 @@ $> ./bin/wof-opensearch-query \
 * https://github.com/whosonfirst/go-whosonfirst-iterwriter
 * https://github.com/whosonfirst/go-whosonfirst-iterate
 * https://github.com/whosonfirst/go-whosonfirst-iterate-git
+* https://github.com/aaronland/go-aws-auth
