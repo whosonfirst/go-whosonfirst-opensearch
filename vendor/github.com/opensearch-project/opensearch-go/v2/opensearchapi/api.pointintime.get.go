@@ -141,6 +141,10 @@ func (r PointInTimeGetRequest) Do(ctx context.Context, transport Transport) (*Re
 		Header:     res.Header,
 	}
 
+	if err = response.Err(); err != nil {
+		return &response, nil, err
+	}
+
 	if len(r.FilterPath) != 0 {
 		return &response, nil, nil
 	}

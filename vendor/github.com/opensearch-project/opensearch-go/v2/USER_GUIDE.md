@@ -15,19 +15,29 @@ In the example below, we create a client, an index with non-default settings, in
 package main
 
 import (
-	"os"
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
+	"net/http"
+	"os"
+	"strings"
+
 	opensearch "github.com/opensearch-project/opensearch-go/v2"
 	opensearchapi "github.com/opensearch-project/opensearch-go/v2/opensearchapi"
-	"net/http"
-	"strings"
+	opensearchutil "github.com/opensearch-project/opensearch-go/v2/opensearchutil"
 )
 
 const IndexName = "go-test-index1"
 
 func main() {
+	if err := example(); err != nil {
+		fmt.Println(fmt.Sprintf("Error: %s", err))
+		os.Exit(1)
+	}
+}
+
+func example() error {
 
 	// Initialize the client with SSL/TLS enabled.
 	client, err := opensearch.NewClient(opensearch.Config{
@@ -39,14 +49,15 @@ func main() {
 		Password:  "admin",
 	})
 	if err != nil {
-		fmt.Println("cannot initialize", err)
-		os.Exit(1)
+		return err
 	}
 
 	// Print OpenSearch version information on console.
 	fmt.Println(client.Info())
 
 	// Define index mapping.
+        // Note: these particular settings (eg, shards/replicas)
+        // will have no effect in AWS OpenSearch Serverless
 	mapping := strings.NewReader(`{
 	    "settings": {
 	        "index": {
@@ -60,30 +71,41 @@ func main() {
 		Index: IndexName,
 		Body:  mapping,
 	}
-	createIndexResponse, err := createIndex.Do(context.Background(), client)
+	ctx := context.Background()
+	var opensearchError *opensearchapi.Error
+	createIndexResponse, err := createIndex.Do(ctx, client)
+	// Load err into opensearchapi.Error to access the fields and tolerate if the index already exists
 	if err != nil {
-		fmt.Println("failed to create index ", err)
-		os.Exit(1)
+		if errors.As(err, &opensearchError) {
+			if opensearchError.Err.Type != "resource_already_exists_exception" {
+				return err
+			}
+		} else {
+			return err
+		}
 	}
 	fmt.Println(createIndexResponse)
 
-	// Add a document to the index.
-	document := strings.NewReader(`{
-	    "title": "Moneyball",
-	    "director": "Bennett Miller",
-	    "year": "2011"
-	}`)
+	// When using a structure, the conversion process to io.Reader can be omitted using utility functions.
+	document := struct {
+		Title    string `json:"title"`
+		Director string `json:"director"`
+		Year     string `json:"year"`
+	}{
+		Title:    "Moneyball",
+		Director: "Bennett Miller",
+		Year:     "2011",
+	}
 
 	docId := "1"
 	req := opensearchapi.IndexRequest{
 		Index:      IndexName,
 		DocumentID: docId,
-		Body:       document,
+		Body:       opensearchutil.NewJSONReader(&document),
 	}
-	insertResponse, err := req.Do(context.Background(), client)
+	insertResponse, err := req.Do(ctx, client)
 	if err != nil {
-		fmt.Println("failed to insert document ", err)
-		os.Exit(1)
+		return err
 	}
 	fmt.Println(insertResponse)
 
@@ -102,23 +124,21 @@ func main() {
 		Body: content,
 	}
 
-	searchResponse, err := search.Do(context.Background(), client)
+	searchResponse, err := search.Do(ctx, client)
 	if err != nil {
-		fmt.Println("failed to search document ", err)
-		os.Exit(1)
+		return err
 	}
 	fmt.Println(searchResponse)
 
 	// Delete the document.
-	delete := opensearchapi.DeleteRequest{
+	deleteReq := opensearchapi.DeleteRequest{
 		Index:      IndexName,
 		DocumentID: docId,
 	}
 
-	deleteResponse, err := delete.Do(context.Background(), client)
+	deleteResponse, err := deleteReq.Do(ctx, client)
 	if err != nil {
-		fmt.Println("failed to delete document ", err)
-		os.Exit(1)
+		return err
 	}
 	fmt.Println("deleting document")
 	fmt.Println(deleteResponse)
@@ -128,14 +148,26 @@ func main() {
 		Index: []string{IndexName},
 	}
 
-	deleteIndexResponse, err := deleteIndex.Do(context.Background(), client)
+	deleteIndexResponse, err := deleteIndex.Do(ctx, client)
 	if err != nil {
-		fmt.Println("failed to delete index ", err)
-		os.Exit(1)
+		return err
 	}
 	fmt.Println("deleting index", deleteIndexResponse)
-}
 
+	// Try to delete the index again which failes as it does not exist
+	// Load err into opensearchapi.Error to access the fields and tolerate if the index is missing
+	_, err = deleteIndex.Do(ctx, client)
+	if err != nil {
+		if errors.As(err, &opensearchError) {
+			if opensearchError.Err.Type != "index_not_found_exception" {
+				return err
+			}
+		} else {
+			return err
+		}
+	}
+	return nil
+}
 ```
 
 ## Amazon OpenSearch Service
@@ -199,17 +231,6 @@ func main() {
 		log.Fatalf("failed to ping: %v", err)
 	}
 	defer resp.Body.Close()
-
-	if resp.IsError() {
-		log.Printf("ping response status: %q", resp.Status())
-
-		respBody, err := io.ReadAll(resp.Body)
-		if err != nil {
-			log.Fatalf("failed to read response body body: %v", err)
-		}
-
-		log.Fatalf("ping resp body: %s", respBody)
-	}
 
 	log.Println("PING OK")
 }
@@ -280,7 +301,7 @@ func main() {
 		Index: indexName,
 		Body:  mapping,
 	}
-	createIndexResponse, err := createIndex.Do(context.Background(), client)
+	createIndexResponse, err := createIndex.Do(ctx, client)
 	if err != nil {
 		log.Fatalf("failed to create index: %v", err)
 	}
@@ -291,7 +312,7 @@ func main() {
 		Index: []string{indexName},
 	}
 
-	deleteIndexResponse, err := deleteIndex.Do(context.Background(), client)
+	deleteIndexResponse, err := deleteIndex.Do(ctx, client)
 	if err != nil {
 		log.Fatalf("failed to delete index: %v", err)
 	}
