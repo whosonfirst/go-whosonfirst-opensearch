@@ -31,15 +31,15 @@ func init() {
 // OpensearchV2Writer is a struct that implements the `Writer` interface for writing documents to an Opensearch
 // index using the github.com/opensearch-project/opensearch-go/v2 package.
 type OpensearchV2Writer struct {
-	wof_writer.Writer
-	DocumentWriter
-	client          *opensearch.Client
-	index           string
-	indexer         opensearchutil.BulkIndexer
-	index_alt_files bool
-	prepare_funcs   []document.PrepareDocumentFunc
-	logger          *log.Logger
-	waitGroup       *sync.WaitGroup
+	wof_writer.Writer // whosonfirst/go-writer.Writer interface
+	DocumentWriter    // whosonfirst/go-whosonfirst-opensearch/writer.DocumentWriter interface
+	client            *opensearch.Client
+	index             string
+	indexer           opensearchutil.BulkIndexer
+	index_alt_files   bool
+	prepare_funcs     []document.PrepareDocumentFunc
+	logger            *log.Logger
+	waitGroup         *sync.WaitGroup
 }
 
 // NewOpensearchV2Writer returns a new `OpensearchV2Writer` instance for writing documents to an
@@ -379,5 +379,12 @@ func (wr *OpensearchV2Writer) Flush(ctx context.Context) error {
 // SetLogger assigns 'logger' to 'wr'.
 func (wr *OpensearchV2Writer) SetLogger(ctx context.Context, logger *log.Logger) error {
 	wr.logger = logger
+	return nil
+}
+
+// AppendPrepareFunc will append 'fn' to the list of `go-whosonfirst-elasticsearch/document.PrepareDocumentFunc` functions
+// to be applied to each document written.
+func (wr *OpensearchV2Writer) AppendPrepareFunc(ctx context.Context, fn document.PrepareDocumentFunc) error {
+	wr.prepare_funcs = append(wr.prepare_funcs, fn)
 	return nil
 }
