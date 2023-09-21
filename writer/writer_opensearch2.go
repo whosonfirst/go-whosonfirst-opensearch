@@ -32,6 +32,7 @@ func init() {
 // index using the github.com/opensearch-project/opensearch-go/v2 package.
 type OpensearchV2Writer struct {
 	wof_writer.Writer
+	DocumentWriter
 	client          *opensearch.Client
 	index           string
 	indexer         opensearchutil.BulkIndexer
