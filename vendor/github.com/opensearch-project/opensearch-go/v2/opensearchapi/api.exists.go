@@ -197,7 +197,7 @@ func (r ExistsRequest) Do(ctx context.Context, transport Transport) (*Response, 
 		Header:     res.Header,
 	}
 
-	return &response, nil
+	return &response, response.Err()
 }
 
 // WithContext sets the request context.

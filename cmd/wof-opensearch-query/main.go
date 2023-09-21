@@ -20,7 +20,7 @@ func main() {
 
 	fs.StringVar(&os_index, "opensearch-index", "", "...")
 
-	client.AppendClientFlags(fs)		
+	client.AppendClientFlags(fs)
 	flagset.Parse(fs)
 
 	ctx := context.Background()
