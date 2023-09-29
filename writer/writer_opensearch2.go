@@ -169,11 +169,11 @@ func NewOpensearchV2Writer(ctx context.Context, uri string) (wof_writer.Writer, 
 			NumWorkers:    workers,
 			FlushInterval: 30 * time.Second,
 			OnError: func(context.Context, error) {
-				wr.logger.Printf("OPENSEARCH bulk indexer reported an error: %v\n", err)
+				wr.logger.Printf("[opensearch][error] bulk indexer reported an error: %v\n", err)
 			},
 			// OnFlushStart func(context.Context) context.Context // Called when the flush starts.
 			OnFlushEnd: func(context.Context) {
-				wr.logger.Printf("OPENSEARCH bulk indexer flush end")
+				wr.logger.Printf("[opensearch][error] bulk indexer flush end")
 			},
 		}
 
@@ -296,7 +296,7 @@ func (wr *OpensearchV2Writer) Write(ctx context.Context, path string, r io.ReadS
 		defer rsp.Body.Close()
 
 		if rsp.IsError() {
-			return 0, fmt.Errorf("Failed to index document, %w", rsp.Status())
+			return 0, fmt.Errorf("Failed to index document, %v", rsp.Status())
 		}
 
 		return 0, nil
@@ -318,9 +318,9 @@ func (wr *OpensearchV2Writer) Write(ctx context.Context, path string, r io.ReadS
 
 		OnFailure: func(ctx context.Context, item opensearchutil.BulkIndexerItem, res opensearchutil.BulkIndexerResponseItem, err error) {
 			if err != nil {
-				wr.logger.Printf("ERROR: Failed to index %s, %s", path, err)
+				wr.logger.Printf("[opensearch][error] Failed to index %s, %s", path, err)
 			} else {
-				wr.logger.Printf("ERROR: Failed to index %s, %s: %s", path, res.Error.Type, res.Error.Reason)
+				wr.logger.Printf("[opensearch][error] Failed to index %s, %s: %s", path, res.Error.Type, res.Error.Reason)
 			}
 
 			wr.waitGroup.Done()

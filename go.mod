@@ -6,7 +6,7 @@ go 1.21
 // go: github.com/opensearch-project/opensearch-go/v2@v2.3.0 requires
 // github.com/aws/aws-sdk-go-v2/config@v1.18.25 requires
 // github.com/aws/aws-sdk-go-v2/feature/ec2/imds@v1.13.3: reading github.com/aws/aws-sdk-go-v2/feature/ec2/imds/go.mod at revision feature/ec2/imds/v1.13.3: unknown revision refs/tags/feature/ec2/imds/v1.13.3
-					 
+
 replace github.com/opensearch-project/opensearch-go/v2 => github.com/opensearch-project/opensearch-go/v2 v2.2.1-0.20230919181059-011b99e67c6e
 
 require (
@@ -18,7 +18,7 @@ require (
 	github.com/whosonfirst/go-whosonfirst-feature v0.0.26
 	github.com/whosonfirst/go-whosonfirst-iterate-git/v2 v2.1.3
 	github.com/whosonfirst/go-whosonfirst-iterate-organization v1.1.1
-	github.com/whosonfirst/go-whosonfirst-iterwriter v0.0.13
+	github.com/whosonfirst/go-whosonfirst-iterwriter v0.0.15
 	github.com/whosonfirst/go-writer/v3 v3.1.0
 )
 

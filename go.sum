@@ -251,8 +251,8 @@ github.com/whosonfirst/go-whosonfirst-iterate-organization v1.1.1 h1:ZDp2028/8vb
 github.com/whosonfirst/go-whosonfirst-iterate-organization v1.1.1/go.mod h1:A2+Fznrh6oSGnMzylFEzzK2eqOsnHe6Bs4l1yLjTDkY=
 github.com/whosonfirst/go-whosonfirst-iterate/v2 v2.3.4 h1:fEhr0jwqxXvG7Nb7id4Q26ucdBZD51TcFNIiU+VNopM=
 github.com/whosonfirst/go-whosonfirst-iterate/v2 v2.3.4/go.mod h1:kDIvHxJTo6XgFKmLHliGLxlqeeHhxuYtdeVZBAcP68g=
-github.com/whosonfirst/go-whosonfirst-iterwriter v0.0.13 h1:5QYZpT/M7Nvl8ds3MCFJc3CIYlNXcJB5AK4rp7ru6xk=
-github.com/whosonfirst/go-whosonfirst-iterwriter v0.0.13/go.mod h1:pQjQi61dc8+0QNGn3vVXTjCTS+GGtlJN+B83dHFl6PE=
+github.com/whosonfirst/go-whosonfirst-iterwriter v0.0.15 h1:ug7qO1S8nVqgp6MLXEvLOe/oCVM9UFNmdnVhq0ImfLA=
+github.com/whosonfirst/go-whosonfirst-iterwriter v0.0.15/go.mod h1:pQjQi61dc8+0QNGn3vVXTjCTS+GGtlJN+B83dHFl6PE=
 github.com/whosonfirst/go-whosonfirst-placetypes v0.3.0/go.mod h1:ez0VFkGFbgT2/z2oi3PIuW6FewsZ2+5glyfDD79XEHk=
 github.com/whosonfirst/go-whosonfirst-placetypes v0.7.0 h1:hm1dySC23ZZYHDleAE201+s5HTUtgle38JlKzfVZVHA=
 github.com/whosonfirst/go-whosonfirst-placetypes v0.7.0/go.mod h1:d7S4er4OFfFsgzMOnHH8mX8q+iPhXWB+merbrMDx/rk=
