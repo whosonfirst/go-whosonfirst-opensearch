@@ -39,6 +39,7 @@ type OpensearchV2Writer struct {
 	index_alt_files   bool
 	prepare_funcs     []document.PrepareDocumentFunc
 	logger            *log.Logger
+	debug             bool
 	waitGroup         *sync.WaitGroup
 }
 
@@ -77,6 +78,8 @@ func NewOpensearchV2Writer(ctx context.Context, uri string) (wof_writer.Writer, 
 
 	opensearch_index := strings.TrimLeft(u.Path, "/")
 
+	debug := false
+
 	q := u.Query()
 
 	q_debug := q.Get("debug")
@@ -94,12 +97,13 @@ func NewOpensearchV2Writer(ctx context.Context, uri string) (wof_writer.Writer, 
 
 	if q_debug != "" {
 
-		debug, err := strconv.ParseBool(q_debug)
+		v, err := strconv.ParseBool(q_debug)
 
 		if err != nil {
 			return nil, fmt.Errorf("Failed to parse ?debug= parameter, %w", err)
 		}
 
+		debug = v
 		os_client_opts.Debug = debug
 	}
 
@@ -128,6 +132,7 @@ func NewOpensearchV2Writer(ctx context.Context, uri string) (wof_writer.Writer, 
 		client:    os_client,
 		index:     opensearch_index,
 		logger:    logger,
+		debug:     debug,
 		waitGroup: wg,
 	}
 
@@ -312,7 +317,9 @@ func (wr *OpensearchV2Writer) Write(ctx context.Context, path string, r io.ReadS
 		Body:       bytes.NewReader(enc_f),
 
 		OnSuccess: func(ctx context.Context, item opensearchutil.BulkIndexerItem, res opensearchutil.BulkIndexerResponseItem) {
-			wr.logger.Printf("Indexed %s as %s\n", path, doc_id)
+			if wr.debug {
+				wr.logger.Printf("[opensearch][debug] Indexed %s as %s\n", path, doc_id)
+			}
 			wr.waitGroup.Done()
 		},
 
