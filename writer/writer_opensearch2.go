@@ -178,7 +178,9 @@ func NewOpensearchV2Writer(ctx context.Context, uri string) (wof_writer.Writer, 
 			},
 			// OnFlushStart func(context.Context) context.Context // Called when the flush starts.
 			OnFlushEnd: func(context.Context) {
-				wr.logger.Printf("[opensearch][error] bulk indexer flush end")
+				if wr.debug {				
+					wr.logger.Printf("[opensearch][debug] bulk indexer flush end")
+				}
 			},
 		}
 
