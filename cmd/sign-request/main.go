@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -19,9 +20,12 @@ func main() {
 
 	var credentials_uri string
 
+	var execute bool
+
 	flag.StringVar(&method, "method", "GET", "")
 	flag.StringVar(&uri, "uri", "", "")
 	flag.StringVar(&credentials_uri, "credentials-uri", "", "")
+	flag.BoolVar(&execute, "execute", false, "")
 
 	flag.Parse()
 
@@ -53,9 +57,30 @@ func main() {
 		log.Fatalf("Failed to sign request, %v", err)
 	}
 
-	err = req.Write(os.Stdout)
+	if !execute {
+		err = req.Write(os.Stdout)
+
+		if err != nil {
+			log.Fatalf("Failed to write request, %v", err)
+		}
+
+		return
+	}
+
+	cl := &http.Client{}
+
+	rsp, err := cl.Do(req)
 
 	if err != nil {
-		log.Fatalf("Failed to write request, %v", err)
+		log.Fatalf("Failed to execute request, %v", err)
 	}
+
+	defer rsp.Body.Close()
+
+	_, err = io.Copy(os.Stdout, rsp.Body)
+
+	if err != nil {
+		log.Fatalf("Failed to copy response, %v", err)
+	}
+
 }
