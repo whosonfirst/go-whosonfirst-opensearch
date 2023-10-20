@@ -51,6 +51,8 @@ func main() {
 		log.Fatalf("Failed to create new HTTP request, %v", err)
 	}
 
+	req.Header.Set("Content-type", "application/json")
+
 	err = signer.SignRequest(req)
 
 	if err != nil {
