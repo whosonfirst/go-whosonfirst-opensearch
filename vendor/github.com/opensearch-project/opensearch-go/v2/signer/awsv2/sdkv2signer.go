@@ -16,15 +16,13 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"io"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	awsSignerV4 "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
+	"github.com/opensearch-project/opensearch-go/v2/signer"
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
-
-	"github.com/aws/aws-sdk-go-v2/aws"
-	awsSignerV4 "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
-
-	"github.com/opensearch-project/opensearch-go/v2/signer"
 )
 
 const (
@@ -71,7 +69,6 @@ func (s *awsSdkV2Signer) SignRequest(r *http.Request) error {
 
 	hash, err := hexEncodedSha256OfRequest(r)
 	r.Header.Set("X-Amz-Content-Sha256", hash)
-
 	if err != nil {
 		return err
 	}
@@ -85,8 +82,7 @@ func hexEncodedSha256OfRequest(r *http.Request) (string, error) {
 	}
 
 	hasher := sha256.New()
-
-	reqBodyBytes, err := io.ReadAll(r.Body)
+	reqBodyBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		return "", err
 	}
@@ -94,8 +90,8 @@ func hexEncodedSha256OfRequest(r *http.Request) (string, error) {
 	if err := r.Body.Close(); err != nil {
 		return "", err
 	}
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(reqBodyBytes))
 
-	r.Body = io.NopCloser(bytes.NewBuffer(reqBodyBytes))
 	hasher.Write(reqBodyBytes)
 	digest := hasher.Sum(nil)
 
