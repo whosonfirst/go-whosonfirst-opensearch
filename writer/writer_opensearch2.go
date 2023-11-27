@@ -215,6 +215,13 @@ func (wr *OpensearchV2Writer) Write(ctx context.Context, path string, r io.ReadS
 
 	// END OF manipulate body here...
 
+	// Nothing to store
+
+	if len(body) == 0 {
+		wr.logger.Printf("[opensearch][debug] Document (%s) yields an empty body after prepping, skipping\n", path)
+		return 0, nil
+	}
+
 	var f interface{}
 	err = json.Unmarshal(body, &f)
 
