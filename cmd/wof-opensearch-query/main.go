@@ -37,7 +37,8 @@ func main() {
 		Index: []string{
 			os_index,
 		},
-		Body: strings.NewReader(q),
+		Body:   strings.NewReader(q),
+		Pretty: true,
 	}
 
 	rsp, err := req.Do(ctx, os_client)

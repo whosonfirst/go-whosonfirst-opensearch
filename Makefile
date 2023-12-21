@@ -6,3 +6,8 @@ cli:
 	go build -mod $(GOMOD) -ldflags="-s -w" -o bin/wof-opensearch-create-index cmd/wof-opensearch-create-index/main.go
 	go build -mod $(GOMOD) -ldflags="-s -w" -o bin/wof-opensearch-delete-index cmd/wof-opensearch-delete-index/main.go
 	go build -mod $(GOMOD) -ldflags="-s -w" -o bin/wof-opensearch-put-mapping cmd/wof-opensearch-put-mapping/main.go
+	go build -mod $(GOMOD) -ldflags="-s -w" -o bin/wof-opensearch-list-aliases cmd/wof-opensearch-list-aliases/main.go
+	go build -mod $(GOMOD) -ldflags="-s -w" -o bin/wof-opensearch-indices-stats cmd/wof-opensearch-indices-stats/main.go
+
+doc:
+	{"query": { "ids": { "values": [ 1880245177 ] } } }

@@ -33,7 +33,8 @@ func main() {
 	}
 
 	req := opensearchapi.IndicesCreateRequest{
-		Index: os_index,
+		Index:  os_index,
+		Pretty: true,
 	}
 
 	if settings != "" {

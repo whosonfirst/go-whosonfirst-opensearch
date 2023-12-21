@@ -34,6 +34,7 @@ func main() {
 		Index: []string{
 			os_index,
 		},
+		Pretty: true,
 	}
 
 	rsp, err := req.Do(context.Background(), os_client)

@@ -13,13 +13,7 @@ import (
 
 func main() {
 
-	var os_index string
-	var mapping string
-
 	fs := flagset.NewFlagSet("opensearch")
-
-	fs.StringVar(&os_index, "opensearch-index", "", "...")
-	fs.StringVar(&mapping, "mapping", "", "...")
 
 	client.AppendClientFlags(fs)
 	flagset.Parse(fs)
@@ -32,26 +26,14 @@ func main() {
 		log.Fatalf("Failed to create Opensearch client, %v", err)
 	}
 
-	r, err := os.Open(mapping)
-
-	if err != nil {
-		log.Fatalf("Failed to open mappings, %v", err)
-	}
-
-	defer r.Close()
-
-	req := opensearchapi.IndicesPutMappingRequest{
-		Index: []string{
-			os_index,
-		},
-		Body:   r,
+	req := opensearchapi.IndicesGetAliasRequest{
 		Pretty: true,
 	}
 
 	rsp, err := req.Do(context.Background(), os_client)
 
 	if err != nil {
-		log.Fatalf("Failed to put mapping for '%s', %v", os_index, err)
+		log.Fatalf("Failed to execute request, %v", err)
 	}
 
 	defer rsp.Body.Close()
@@ -67,5 +49,4 @@ func main() {
 	}
 
 	os.Exit(0)
-
 }
