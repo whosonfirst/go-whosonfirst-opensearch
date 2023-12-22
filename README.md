@@ -58,9 +58,30 @@ $> ./bin/wof-opensearch-index \
 
 TBW. Have a look at [writer/writer_opensearch2.go](writer/writer_opensearch2.go) and [whosonfirst/go-whosonfirst-iterwriter](https://github.com/whosonfirst/go-whosonfirst-iterwriter) for the time being.
 
+### wof-opensearch-list-aliases
+
+List all the aliases for an OpenSearch instance.
+
+```
+$> ./bin/wof-opensearch-list-aliases \
+	-opensearch-aws-credentials-uri 'aws://{REGION}?credentials=iam:' \
+	-opensearch-endpoint https://{OPENSEARCH_DOMAIN}.{REGION}.es.amazonaws.com \
+```
+
+### wof-opensearch-get-mapping
+
+Retrieve the mappings for an OpenSearch index.
+
+```
+$> ./bin/wof-opensearch-get-mapping \
+	-opensearch-aws-credentials-uri 'aws://{REGION}?credentials=iam:' \
+	-opensearch-endpoint https://{OPENSEARCH_DOMAIN}.{REGION}.es.amazonaws.com \
+	-opensearch-index collection
+```
+
 ### wof-opensearch-put-mapping
 
-Assign and update mappings in an OpenSearch index.
+Assign and update _new_ mappings in an OpenSearch index. Remember: It is not possible to change existing mappings in an index. 
 
 ```
 $> ./bin/wof-opensearch-put-mapping \
