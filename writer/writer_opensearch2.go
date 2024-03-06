@@ -13,9 +13,9 @@ import (
 	"sync"
 	"time"
 
-	opensearch "github.com/opensearch-project/opensearch-go/v2"
-	"github.com/opensearch-project/opensearch-go/v2/opensearchapi"
-	"github.com/opensearch-project/opensearch-go/v2/opensearchutil"
+	opensearch "github.com/opensearch-project/opensearch-go/v3"
+	"github.com/opensearch-project/opensearch-go/v3/opensearchapi"
+	"github.com/opensearch-project/opensearch-go/v3/opensearchutil"
 	"github.com/whosonfirst/go-whosonfirst-elasticsearch/document"
 	"github.com/whosonfirst/go-whosonfirst-feature/properties"
 	wof_client "github.com/whosonfirst/go-whosonfirst-opensearch/client"
@@ -43,7 +43,7 @@ type OpensearchV2Writer struct {
 }
 
 // NewOpensearchV2Writer returns a new `OpensearchV2Writer` instance for writing documents to an
-// Opensearch index using the github.com/opensearch-project/opensearch-go/v2 package configured by 'uri' which
+// Opensearch index using the github.com/opensearch-project/opensearch-go/v3 package configured by 'uri' which
 // is expected to take the form of:
 //
 //	opensearch://{HOST}:{PORT}/{INDEX}?{QUERY_PARAMETERS}

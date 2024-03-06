@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/aaronland/go-aws-auth v1.3.1
 	github.com/cenkalti/backoff/v4 v4.2.1
-	github.com/opensearch-project/opensearch-go/v2 v2.3.0
+	github.com/opensearch-project/opensearch-go/v3 v3.0.0
 	github.com/sfomuseum/go-flags v0.10.0
 	github.com/whosonfirst/go-whosonfirst-elasticsearch v0.10.3
 	github.com/whosonfirst/go-whosonfirst-feature v0.0.27
@@ -23,7 +23,7 @@ require (
 	github.com/aaronland/go-json-query v0.1.4 // indirect
 	github.com/aaronland/go-roster v1.0.0 // indirect
 	github.com/aaronland/go-string v1.0.0 // indirect
-	github.com/aws/aws-sdk-go v1.44.314 // indirect
+	github.com/aws/aws-sdk-go v1.48.13 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.24.1 // indirect
 	github.com/aws/aws-sdk-go-v2/config v1.26.6 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.16.16 // indirect
