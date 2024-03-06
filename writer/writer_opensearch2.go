@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"log/slog"
 	"net/url"
 	"strconv"
 	"sync"
@@ -38,7 +39,6 @@ type OpensearchV2Writer struct {
 	index_alt_files   bool
 	prepare_funcs     []document.PrepareDocumentFunc
 	logger            *log.Logger
-	debug             bool
 	waitGroup         *sync.WaitGroup
 }
 
@@ -50,7 +50,6 @@ type OpensearchV2Writer struct {
 //	opensearch2://{HOST}:{PORT}/{INDEX}?{QUERY_PARAMETERS}
 //
 // Where {QUERY_PARAMETERS} may be one or more of the following:
-// * ?debug={BOOLEAN}. If true then verbose Opensearch logging for requests and responses will be enabled. Default is false.
 // * ?bulk-index={BOOLEAN}. If true then writes will be performed using a "bulk indexer". Default is true.
 // * ?workers={INT}. The number of users to enable for bulk indexing. Default is 10.
 func NewOpensearchV2Writer(ctx context.Context, uri string) (wof_writer.Writer, error) {
@@ -68,7 +67,6 @@ func NewOpensearchV2Writer(ctx context.Context, uri string) (wof_writer.Writer, 
 	}
 
 	opensearch_index := os_client_opts.Index
-	debug := os_client_opts.Debug
 
 	u, err := url.Parse(uri)
 
@@ -86,7 +84,6 @@ func NewOpensearchV2Writer(ctx context.Context, uri string) (wof_writer.Writer, 
 		client:    os_client,
 		index:     opensearch_index,
 		logger:    logger,
-		debug:     debug,
 		waitGroup: wg,
 	}
 
@@ -128,13 +125,11 @@ func NewOpensearchV2Writer(ctx context.Context, uri string) (wof_writer.Writer, 
 			NumWorkers:    workers,
 			FlushInterval: 30 * time.Second,
 			OnError: func(context.Context, error) {
-				wr.logger.Printf("[opensearch][error] bulk indexer reported an error: %v\n", err)
+				slog.Error("Bulk error reported an error", "error", err)
 			},
 			// OnFlushStart func(context.Context) context.Context // Called when the flush starts.
 			OnFlushEnd: func(context.Context) {
-				if wr.debug {
-					wr.logger.Printf("[opensearch][debug] bulk indexer flush end")
-				}
+				slog.Debug("Bulk indexer flush end")
 			},
 		}
 
@@ -218,7 +213,7 @@ func (wr *OpensearchV2Writer) Write(ctx context.Context, path string, r io.ReadS
 	// Nothing to store
 
 	if len(body) == 0 {
-		wr.logger.Printf("[opensearch][debug] Document (%s) yields an empty body after prepping, skipping\n", path)
+		slog.Debug("Document yields an empty body after prepping, skipping", "path", path)
 		return 0, nil
 	}
 
@@ -280,17 +275,15 @@ func (wr *OpensearchV2Writer) Write(ctx context.Context, path string, r io.ReadS
 		Body:       bytes.NewReader(enc_f),
 
 		OnSuccess: func(ctx context.Context, item opensearchutil.BulkIndexerItem, res opensearchutil.BulkIndexerResponseItem) {
-			if wr.debug {
-				wr.logger.Printf("[opensearch][debug] Indexed %s as %s\n", path, doc_id)
-			}
+			slog.Debug("Index complete", "path", path, "doc_id", doc_id)
 			wr.waitGroup.Done()
 		},
 
 		OnFailure: func(ctx context.Context, item opensearchutil.BulkIndexerItem, res opensearchutil.BulkIndexerResponseItem, err error) {
 			if err != nil {
-				wr.logger.Printf("[opensearch][error] Failed to index %s, %s", path, err)
+				slog.Error("Failed to index record", "path", path, "error", err)
 			} else {
-				wr.logger.Printf("[opensearch][error] Failed to index %s, %s: %s", path, res.Error.Type, res.Error.Reason)
+				slog.Error("Failed to index record", "path", path, "type", res.Error.Type, "reason", res.Error.Reason)
 			}
 
 			wr.waitGroup.Done()
@@ -337,7 +330,7 @@ func (wr *OpensearchV2Writer) Close(ctx context.Context) error {
 		return fmt.Errorf("Indexed (%d) documents with (%d) errors", stats.NumFlushed, stats.NumFailed)
 	}
 
-	wr.logger.Printf("Successfully indexed (%d) documents", stats.NumFlushed)
+	slog.Info("Index complete", "indexed", stats.NumFlushed)
 	return nil
 }
 
