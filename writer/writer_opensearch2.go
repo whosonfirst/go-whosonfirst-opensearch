@@ -125,7 +125,9 @@ func NewOpensearchV2Writer(ctx context.Context, uri string) (wof_writer.Writer, 
 			NumWorkers:    workers,
 			FlushInterval: 30 * time.Second,
 			OnError: func(context.Context, error) {
-				slog.Error("Bulk error reported an error", "error", err)
+				if err != nil {
+					slog.Error("Bulk indexer reported an error", "error", err)
+				}
 			},
 			// OnFlushStart func(context.Context) context.Context // Called when the flush starts.
 			OnFlushEnd: func(context.Context) {
