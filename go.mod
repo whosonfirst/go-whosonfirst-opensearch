@@ -1,6 +1,8 @@
 module github.com/whosonfirst/go-whosonfirst-opensearch
 
-go 1.21
+go 1.22
+
+toolchain go1.22.1
 
 require (
 	github.com/aaronland/go-aws-auth v1.1.3
@@ -12,6 +14,7 @@ require (
 	github.com/whosonfirst/go-whosonfirst-iterate-git/v2 v2.1.3
 	github.com/whosonfirst/go-whosonfirst-iterate-organization v1.1.1
 	github.com/whosonfirst/go-whosonfirst-iterwriter v0.0.16
+	github.com/whosonfirst/go-whosonfirst-spelunker v0.0.0-20240320192355-9b5a32a26365
 	github.com/whosonfirst/go-writer/v3 v3.1.0
 )
 
