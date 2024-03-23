@@ -12,7 +12,7 @@ require (
 	github.com/whosonfirst/go-whosonfirst-iterate-git/v2 v2.1.4
 	github.com/whosonfirst/go-whosonfirst-iterate-organization v1.1.1
 	github.com/whosonfirst/go-whosonfirst-iterwriter v0.0.17
-	github.com/whosonfirst/go-whosonfirst-spelunker v0.0.0-20240321061647-4901c8463127
+	github.com/whosonfirst/go-whosonfirst-spelunker v0.0.0-20240323061722-72cffe1d81d3
 	github.com/whosonfirst/go-writer/v3 v3.1.0
 )
 

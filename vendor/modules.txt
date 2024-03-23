@@ -435,7 +435,7 @@ github.com/whosonfirst/go-whosonfirst-placetypes
 ## explicit; go 1.12
 github.com/whosonfirst/go-whosonfirst-sources
 github.com/whosonfirst/go-whosonfirst-sources/sources
-# github.com/whosonfirst/go-whosonfirst-spelunker v0.0.0-20240321061647-4901c8463127
+# github.com/whosonfirst/go-whosonfirst-spelunker v0.0.0-20240323061722-72cffe1d81d3
 ## explicit; go 1.22
 github.com/whosonfirst/go-whosonfirst-spelunker/document
 # github.com/whosonfirst/go-whosonfirst-uri v1.3.0
