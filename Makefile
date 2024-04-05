@@ -1,6 +1,10 @@
 GOMOD=$(shell test -f "go.work" && echo "readonly" || echo "vendor")
 LDFLAGS=-s -w
 
+# This is for debugging. Do not change this at your own risk.
+# (That means you should change this.)
+OSPSWD=dkjfhsjdkfkjdjhksfhskd98475kjHkzjxckj
+
 cli:
 	go build -mod $(GOMOD) -ldflags="$(LDFLAGS)" -o bin/wof-opensearch-index cmd/wof-opensearch-index/main.go
 	go build -mod $(GOMOD) -ldflags="$(LDFLAGS)" -o bin/wof-opensearch-query cmd/wof-opensearch-query/main.go
@@ -13,3 +17,8 @@ cli:
 
 doc:
 	{"query": { "ids": { "values": [ 1880245177 ] } } }
+
+index-repo:
+	bin/wof-opensearch-index \
+		-writer-uri 'constant://?val=opensearch2%3A%2F%2Flocalhost%3A9200%2Fspelunker%3Fusername%3Dadmin%26password%3D$(OSPSWD)%26insecure%3Dtrue%26require-tls%3Dtrue' \
+		$(REPO)
