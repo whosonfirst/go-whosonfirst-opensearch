@@ -10,7 +10,7 @@ require (
 	github.com/whosonfirst/go-whosonfirst-elasticsearch v0.11.0
 	github.com/whosonfirst/go-whosonfirst-feature v0.0.27
 	github.com/whosonfirst/go-whosonfirst-iterate-git/v2 v2.1.6
-	github.com/whosonfirst/go-whosonfirst-iterate-organization v1.2.0
+	github.com/whosonfirst/go-whosonfirst-iterate-organization v1.2.1
 	github.com/whosonfirst/go-whosonfirst-iterwriter v0.0.17
 	github.com/whosonfirst/go-whosonfirst-spelunker v0.0.0-20240405160317-06b7f8193dd4
 	github.com/whosonfirst/go-writer/v3 v3.1.1
@@ -75,7 +75,7 @@ require (
 	github.com/whosonfirst/go-whosonfirst-crawl v0.2.2 // indirect
 	github.com/whosonfirst/go-whosonfirst-flags v0.5.1 // indirect
 	github.com/whosonfirst/go-whosonfirst-github v0.6.2 // indirect
-	github.com/whosonfirst/go-whosonfirst-iterate/v2 v2.4.0 // indirect
+	github.com/whosonfirst/go-whosonfirst-iterate/v2 v2.4.1 // indirect
 	github.com/whosonfirst/go-whosonfirst-placetypes v0.7.2 // indirect
 	github.com/whosonfirst/go-whosonfirst-sources v0.1.0 // indirect
 	github.com/whosonfirst/go-whosonfirst-uri v1.3.0 // indirect
@@ -95,6 +95,6 @@ require (
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231120223509-83a465c0220f // indirect
 	google.golang.org/grpc v1.59.0 // indirect
-	google.golang.org/protobuf v1.33.0 // indirect
+	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
