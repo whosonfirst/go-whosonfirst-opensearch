@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	opensearch "github.com/opensearch-project/opensearch-go/v2"
@@ -41,6 +42,8 @@ type OpensearchV2Writer struct {
 	prepare_funcs     []document.PrepareDocumentFunc
 	logger            *log.Logger
 	waitGroup         *sync.WaitGroup
+	flushings         int32
+	waiting           int32
 }
 
 // NewOpensearchV2Writer returns a new `OpensearchV2Writer` instance for writing documents to an
@@ -86,6 +89,8 @@ func NewOpensearchV2Writer(ctx context.Context, uri string) (wof_writer.Writer, 
 		index:     opensearch_index,
 		logger:    logger,
 		waitGroup: wg,
+		flushings: int32(0),
+		waiting:   int32(0),
 	}
 
 	bulk_index := true
@@ -130,9 +135,14 @@ func NewOpensearchV2Writer(ctx context.Context, uri string) (wof_writer.Writer, 
 					slog.Error("Bulk indexer reported an error", "error", err)
 				}
 			},
-			// OnFlushStart func(context.Context) context.Context // Called when the flush starts.
+			OnFlushStart: func(ctx context.Context) context.Context {
+				atomic.AddInt32(&wr.flushings, 1)
+				slog.Error("Bulk indexer flush start", "total count", atomic.LoadInt32(&wr.flushings))
+				return ctx
+			},
 			OnFlushEnd: func(context.Context) {
-				slog.Debug("Bulk indexer flush end")
+				atomic.AddInt32(&wr.flushings, -1)
+				slog.Error("Bulk indexer flush end", "remaining", atomic.LoadInt32(&wr.flushings))
 			},
 		}
 
@@ -270,6 +280,9 @@ func (wr *OpensearchV2Writer) Write(ctx context.Context, path string, r io.ReadS
 
 	// Do bulk index
 
+	atomic.AddInt32(&wr.waiting, 1)
+	// slog.Error("Add to wait group", "count", atomic.LoadInt32(&wr.waiting))
+
 	wr.waitGroup.Add(1)
 
 	bulk_item := opensearchutil.BulkIndexerItem{
@@ -280,6 +293,9 @@ func (wr *OpensearchV2Writer) Write(ctx context.Context, path string, r io.ReadS
 		OnSuccess: func(ctx context.Context, item opensearchutil.BulkIndexerItem, res opensearchutil.BulkIndexerResponseItem) {
 			slog.Debug("Index complete", "path", path, "doc_id", doc_id)
 			wr.waitGroup.Done()
+
+			atomic.AddInt32(&wr.waiting, -1)
+			// slog.Error("Remove from wait group (success)", "count", atomic.LoadInt32(&wr.waiting))
 		},
 
 		OnFailure: func(ctx context.Context, item opensearchutil.BulkIndexerItem, res opensearchutil.BulkIndexerResponseItem, err error) {
@@ -290,6 +306,9 @@ func (wr *OpensearchV2Writer) Write(ctx context.Context, path string, r io.ReadS
 			}
 
 			wr.waitGroup.Done()
+			atomic.AddInt32(&wr.waiting, -1)
+			// slog.Error("Remove from wait group (failure)", "count", atomic.LoadInt32(&wr.waiting))
+
 		},
 	}
 
@@ -319,19 +338,42 @@ func (wr *OpensearchV2Writer) Close(ctx context.Context) error {
 
 	// Do bulk index
 
+	slog.Error("Close")
 	err := wr.indexer.Close(ctx)
 
 	if err != nil {
 		return fmt.Errorf("Failed to close indexer, %w", err)
 	}
 
+	done_ch := make(chan bool)
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
+
+	go func() {
+
+		for {
+			select {
+			case <-done_ch:
+				return
+			case <-ticker.C:
+				slog.Error("Wait group tasks remaining to complete", "count", atomic.LoadInt32(&wr.waiting))
+			}
+		}
+
+	}()
+
+	slog.Error("Close okay, wait")
 	wr.waitGroup.Wait()
 
+	done_ch <- true
+
+	slog.Error("Done waiting", "remaining", atomic.LoadInt32(&wr.waiting))
 	stats := wr.indexer.Stats()
 
 	if stats.NumFailed > 0 {
 		return fmt.Errorf("Indexed (%d) documents with (%d) errors", stats.NumFlushed, stats.NumFailed)
 	}
+	slog.Error("WUT")
 
 	slog.Info("Index complete", "indexed", stats.NumFlushed)
 	return nil
