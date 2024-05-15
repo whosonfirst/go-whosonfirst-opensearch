@@ -12,7 +12,7 @@ require (
 	github.com/whosonfirst/go-whosonfirst-iterate-git/v2 v2.1.6
 	github.com/whosonfirst/go-whosonfirst-iterate-organization v1.2.1
 	github.com/whosonfirst/go-whosonfirst-iterwriter v0.0.17
-	github.com/whosonfirst/go-whosonfirst-spelunker v0.0.0-20240405160317-06b7f8193dd4
+	github.com/whosonfirst/go-whosonfirst-spelunker v0.0.1
 	github.com/whosonfirst/go-writer/v3 v3.1.1
 )
 
@@ -85,7 +85,7 @@ require (
 	gocloud.dev v0.36.0 // indirect
 	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/mod v0.12.0 // indirect
-	golang.org/x/net v0.23.0 // indirect
+	golang.org/x/net v0.22.0 // indirect
 	golang.org/x/oauth2 v0.18.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
@@ -95,6 +95,6 @@ require (
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231120223509-83a465c0220f // indirect
 	google.golang.org/grpc v1.59.0 // indirect
-	google.golang.org/protobuf v1.33.0 // indirect
+	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
