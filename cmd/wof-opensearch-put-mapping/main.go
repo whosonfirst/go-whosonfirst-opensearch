@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/opensearch-project/opensearch-go/v2/opensearchapi"
+	"github.com/opensearch-project/opensearch-go/v4/opensearchapi"
 	"github.com/sfomuseum/go-flags/flagset"
 	"github.com/whosonfirst/go-whosonfirst-opensearch/client"
 )

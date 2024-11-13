@@ -14,9 +14,9 @@ import (
 
 	"github.com/aaronland/go-aws-auth"
 	"github.com/cenkalti/backoff/v4"
-	opensearch "github.com/opensearch-project/opensearch-go/v2"
-	"github.com/opensearch-project/opensearch-go/v2/opensearchtransport"
-	requestsigner "github.com/opensearch-project/opensearch-go/v2/signer/awsv2"
+	opensearch "github.com/opensearch-project/opensearch-go/v4"
+	"github.com/opensearch-project/opensearch-go/v4/opensearchtransport"
+	requestsigner "github.com/opensearch-project/opensearch-go/v4/signer/awsv2"
 )
 
 // ClientOptions is a struct definining properties used to create a new `opensearch.Client` instance

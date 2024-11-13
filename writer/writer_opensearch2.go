@@ -13,9 +13,9 @@ import (
 	"sync"
 	"time"
 
-	opensearch "github.com/opensearch-project/opensearch-go/v2"
-	"github.com/opensearch-project/opensearch-go/v2/opensearchapi"
-	"github.com/opensearch-project/opensearch-go/v2/opensearchutil"
+	opensearch "github.com/opensearch-project/opensearch-go/v4"
+	"github.com/opensearch-project/opensearch-go/v4/opensearchapi"
+	"github.com/opensearch-project/opensearch-go/v4/opensearchutil"
 	"github.com/whosonfirst/go-whosonfirst-elasticsearch/document"
 	"github.com/whosonfirst/go-whosonfirst-feature/properties"
 	wof_client "github.com/whosonfirst/go-whosonfirst-opensearch/client"
