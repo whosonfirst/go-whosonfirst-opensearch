@@ -44,7 +44,7 @@ func main() {
 		Indices: []string{
 			os_index,
 		},
-		Body:   r,
+		Body: r,
 		Params: opensearchapi.MappingPutParams{
 			Pretty: true,
 		},
