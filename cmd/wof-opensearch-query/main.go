@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"io"
+	"encoding/json"
 	"log"
 	"os"
 	"strings"
@@ -33,30 +33,27 @@ func main() {
 
 	q := strings.Join(fs.Args(), " ")
 
-	req := opensearchapi.SearchRequest{
-		Index: []string{
+	req := &opensearchapi.SearchReq{
+		Indices: []string{
 			os_index,
 		},
-		Body:   strings.NewReader(q),
-		Pretty: true,
+		Body: strings.NewReader(q),
+		Params: opensearchapi.SearchParams{
+			Pretty: true,
+		},
 	}
 
-	rsp, err := req.Do(ctx, os_client)
+	rsp, err := os_client.Search(ctx, req)
 
 	if err != nil {
 		log.Fatalf("Failed to perform query, %v", err)
 	}
 
-	defer rsp.Body.Close()
-
-	_, err = io.Copy(os.Stdout, rsp.Body)
+	enc := json.NewEncoder(os.Stdout)
+	err = enc.Encode(rsp)
 
 	if err != nil {
 		log.Fatalf("Failed to copy response, %v", err)
-	}
-
-	if rsp.IsError() {
-		os.Exit(1)
 	}
 
 	os.Exit(0)
