@@ -15,10 +15,12 @@ import (
 func main() {
 
 	var os_index string
+	var os_query_all bool
 
 	fs := flagset.NewFlagSet("opensearch")
 
-	fs.StringVar(&os_index, "opensearch-index", "", "...")
+	fs.StringVar(&os_index, "opensearch-index", "", "The name of the index to query.")
+	fs.BoolVar(&os_query_all, "opensearch-query-all", false, "Convenience flag to auto-generate a match_all query.")
 
 	client.AppendClientFlags(fs)
 	flagset.Parse(fs)
@@ -32,6 +34,10 @@ func main() {
 	}
 
 	q := strings.Join(fs.Args(), " ")
+
+	if os_query_all {
+		q = `{"query": { "match_all": {} }}`
+	}
 
 	req := &opensearchapi.SearchReq{
 		Indices: []string{
