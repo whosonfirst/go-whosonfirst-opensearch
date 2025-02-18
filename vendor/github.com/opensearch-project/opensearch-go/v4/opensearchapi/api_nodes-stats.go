@@ -112,6 +112,7 @@ type NodesStats struct {
 	Repositories                   []json.RawMessage                        `json:"repositories"`
 	AdmissionControl               NodesStatsAdmissionControl               `json:"admission_control"`
 	Caches                         NodesStatsCaches                         `json:"caches"`
+	RemoteStore                    NodeStatsRemoteStore                     `json:"remote_store"`
 }
 
 // NodesStatsIndices is a sub type of NodesStats representing Indices information of the node
@@ -138,13 +139,14 @@ type NodesStatsIndices struct {
 		DocStatus            map[string]int `json:"doc_status"`
 	} `json:"indexing"`
 	Get struct {
-		Total               int `json:"total"`
-		TimeInMillis        int `json:"time_in_millis"`
-		ExistsTotal         int `json:"exists_total"`
-		ExistsTimeInMillis  int `json:"exists_time_in_millis"`
-		MissingTotal        int `json:"missing_total"`
-		MissingTimeInMillis int `json:"missing_time_in_millis"`
-		Current             int `json:"current"`
+		Total               int    `json:"total"`
+		TimeInMillis        int    `json:"time_in_millis"`
+		ExistsTotal         int    `json:"exists_total"`
+		ExistsTimeInMillis  int    `json:"exists_time_in_millis"`
+		MissingTotal        int    `json:"missing_total"`
+		MissingTimeInMillis int    `json:"missing_time_in_millis"`
+		Current             int    `json:"current"`
+		GetTime             string `json:"getTime"`
 	} `json:"get"`
 	Search struct {
 		OpenContexts                int     `json:"open_contexts"`
@@ -728,4 +730,9 @@ type NodesStatsCaches struct {
 		ItemCount   int    `json:"item_count"`
 		StoreName   string `json:"store_name"`
 	} `json:"request_cache"`
+}
+
+// NodeStatsRemoteStore is a sub type of NodesStats
+type NodeStatsRemoteStore struct {
+	LastSuccessfulFetchOfPinnedTimestamps int `json:"last_successful_fetch_of_pinned_timestamps"`
 }

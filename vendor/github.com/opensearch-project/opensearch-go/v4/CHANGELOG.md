@@ -2,6 +2,30 @@
 
 Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [4.4.0]
+
+### Added
+- Adds `Highlight` field to `SearchHit` ([#654](https://github.com/opensearch-project/opensearch-go/pull/654))
+- Adds `MatchedQueries` field to `SearchHit` ([#663](https://github.com/opensearch-project/opensearch-go/pull/663))
+- Adds support for Opensearch 2.19 ([#668](https://github.com/opensearch-project/opensearch-go/pull/668))
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+### Dependencies
+- Bump `github.com/aws/aws-sdk-go` from 1.55.5 to 1.55.6 ([#657](https://github.com/opensearch-project/opensearch-go/pull/657))
+- Bump `github.com/wI2L/jsondiff` from 0.6.0 to 0.6.1 ([#643](https://github.com/opensearch-project/opensearch-go/pull/643))
+- Bump `github.com/aws/aws-sdk-go-v2` from 1.32.2 to 1.36.1 ([#664](https://github.com/opensearch-project/opensearch-go/pull/664))
+- Bump `github.com/stretchr/testify` from 1.9.0 to 1.10.0 ([#644](https://github.com/opensearch-project/opensearch-go/pull/644))
+- Bump `github.com/aws/aws-sdk-go-v2/config` from 1.27.43 to 1.29.6 ([#665](https://github.com/opensearch-project/opensearch-go/pull/665))
+
 ## [4.3.0]
 
 ### Added
@@ -278,6 +302,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Bumps `github.com/stretchr/testify` from 1.8.0 to 1.8.1
 - Bumps `github.com/aws/aws-sdk-go` from 1.44.45 to 1.44.132
 
+[4.4.0]: https://github.com/opensearch-project/opensearch-go/compare/v4.3.0...v4.4.0
 [4.3.0]: https://github.com/opensearch-project/opensearch-go/compare/v4.2.0...v4.3.0
 [4.2.0]: https://github.com/opensearch-project/opensearch-go/compare/v4.1.0...v4.2.0
 [4.1.0]: https://github.com/opensearch-project/opensearch-go/compare/v4.0.0...v4.1.0
