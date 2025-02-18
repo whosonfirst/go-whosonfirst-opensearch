@@ -8,6 +8,10 @@ Documentation is incomplete at this time.
 
 ## A note about version numbers
 
+```
+import "github.com/whosonfirst/go-whosonfirst-opensearch/v4"
+```
+
 The `github.com/whosonfirst/go-whosonfirst-opensearch` package targets the `opensearch-project/opensearch-go/v2` package.
 
 Starting with `github.com/whosonfirst/go-whosonfirst-opensearch/v4` version numbers will track which their corresponding major version of the `opensearch-project/opensearch-go` package.
