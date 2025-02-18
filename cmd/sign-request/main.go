@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/aaronland/go-aws-auth"
-	requestsigner "github.com/opensearch-project/opensearch-go/v2/signer/awsv2"
+	requestsigner "github.com/opensearch-project/opensearch-go/v4/signer/awsv2"
 )
 
 func main() {

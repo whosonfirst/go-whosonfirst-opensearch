@@ -13,12 +13,12 @@ import (
 	"sync"
 	"time"
 
-	opensearch "github.com/opensearch-project/opensearch-go/v2"
-	"github.com/opensearch-project/opensearch-go/v2/opensearchapi"
-	"github.com/opensearch-project/opensearch-go/v2/opensearchutil"
+	// "github.com/opensearch-project/opensearch-go/v4"
+	"github.com/opensearch-project/opensearch-go/v4/opensearchapi"
+	"github.com/opensearch-project/opensearch-go/v4/opensearchutil"
 	"github.com/whosonfirst/go-whosonfirst-elasticsearch/document"
 	"github.com/whosonfirst/go-whosonfirst-feature/properties"
-	wof_client "github.com/whosonfirst/go-whosonfirst-opensearch/client"
+	wof_client "github.com/whosonfirst/go-whosonfirst-opensearch/v4/client"
 	sp_document "github.com/whosonfirst/go-whosonfirst-spelunker/document"
 	wof_writer "github.com/whosonfirst/go-writer/v3"
 )
@@ -34,7 +34,7 @@ func init() {
 type OpensearchV2Writer struct {
 	wof_writer.Writer // whosonfirst/go-writer.Writer interface
 	DocumentWriter    // whosonfirst/go-whosonfirst-opensearch/writer.DocumentWriter interface
-	client            *opensearch.Client
+	client            *opensearchapi.Client
 	index             string
 	indexer           opensearchutil.BulkIndexer
 	index_alt_files   bool
@@ -246,24 +246,28 @@ func (wr *OpensearchV2Writer) Write(ctx context.Context, path string, r io.ReadS
 		wr.waitGroup.Add(1)
 		defer wr.waitGroup.Done()
 
-		req := opensearchapi.IndexRequest{
+		req := opensearchapi.IndexReq{
 			Index:      wr.index,
 			DocumentID: doc_id,
 			Body:       bytes.NewReader(enc_f),
-			Refresh:    "true",
+			Params: opensearchapi.IndexParams{
+				Refresh: "true",
+			},
 		}
 
-		rsp, err := req.Do(ctx, wr.client)
+		_, err := wr.client.Index(ctx, req)
 
 		if err != nil {
 			return 0, fmt.Errorf("Error getting response: %w", err)
 		}
 
-		defer rsp.Body.Close()
+		/*
+			defer rsp.Body.Close()
 
-		if rsp.IsError() {
-			return 0, fmt.Errorf("Failed to index document, %v", rsp.Status())
-		}
+			if rsp.IsError() {
+				return 0, fmt.Errorf("Failed to index document, %v", rsp.Status())
+			}
+		*/
 
 		return 0, nil
 	}
@@ -277,12 +281,12 @@ func (wr *OpensearchV2Writer) Write(ctx context.Context, path string, r io.ReadS
 		DocumentID: doc_id,
 		Body:       bytes.NewReader(enc_f),
 
-		OnSuccess: func(ctx context.Context, item opensearchutil.BulkIndexerItem, res opensearchutil.BulkIndexerResponseItem) {
+		OnSuccess: func(ctx context.Context, item opensearchutil.BulkIndexerItem, res opensearchapi.BulkRespItem) {
 			slog.Debug("Index complete", "path", path, "doc_id", doc_id)
 			wr.waitGroup.Done()
 		},
 
-		OnFailure: func(ctx context.Context, item opensearchutil.BulkIndexerItem, res opensearchutil.BulkIndexerResponseItem, err error) {
+		OnFailure: func(ctx context.Context, item opensearchutil.BulkIndexerItem, res opensearchapi.BulkRespItem, err error) {
 			if err != nil {
 				slog.Error("Failed to index record", "path", path, "error", err)
 			} else {

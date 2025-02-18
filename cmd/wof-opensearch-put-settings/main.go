@@ -2,13 +2,13 @@ package main
 
 import (
 	"context"
-	"io"
+	"encoding/json"
 	"log"
 	"os"
 
-	"github.com/opensearch-project/opensearch-go/v2/opensearchapi"
+	"github.com/opensearch-project/opensearch-go/v4/opensearchapi"
 	"github.com/sfomuseum/go-flags/flagset"
-	"github.com/whosonfirst/go-whosonfirst-opensearch/client"
+	"github.com/whosonfirst/go-whosonfirst-opensearch/v4/client"
 )
 
 func main() {
@@ -40,30 +40,27 @@ func main() {
 
 	defer r.Close()
 
-	req := opensearchapi.IndicesPutSettingsRequest{
-		Index: []string{
+	req := opensearchapi.SettingsPutReq{
+		Indices: []string{
 			os_index,
 		},
-		Body:   r,
-		Pretty: true,
+		Body: r,
+		Params: opensearchapi.SettingsPutParams{
+			Pretty: true,
+		},
 	}
 
-	rsp, err := req.Do(context.Background(), os_client)
+	rsp, err := os_client.Indices.Settings.Put(ctx, req)
 
 	if err != nil {
 		log.Fatalf("Failed to put settings for '%s', %v", os_index, err)
 	}
 
-	defer rsp.Body.Close()
-
-	_, err = io.Copy(os.Stdout, rsp.Body)
+	enc := json.NewEncoder(os.Stdout)
+	err = enc.Encode(rsp)
 
 	if err != nil {
 		log.Fatalf("Failed to copy response, %v", err)
-	}
-
-	if rsp.IsError() {
-		os.Exit(1)
 	}
 
 	os.Exit(0)

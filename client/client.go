@@ -14,9 +14,10 @@ import (
 
 	"github.com/aaronland/go-aws-auth"
 	"github.com/cenkalti/backoff/v4"
-	opensearch "github.com/opensearch-project/opensearch-go/v2"
-	"github.com/opensearch-project/opensearch-go/v2/opensearchtransport"
-	requestsigner "github.com/opensearch-project/opensearch-go/v2/signer/awsv2"
+	"github.com/opensearch-project/opensearch-go/v4"
+	"github.com/opensearch-project/opensearch-go/v4/opensearchapi"
+	"github.com/opensearch-project/opensearch-go/v4/opensearchtransport"
+	requestsigner "github.com/opensearch-project/opensearch-go/v4/signer/awsv2"
 )
 
 // ClientOptions is a struct definining properties used to create a new `opensearch.Client` instance
@@ -119,7 +120,7 @@ func ClientOptionsFromURI(ctx context.Context, uri string) (*ClientOptions, erro
 	return os_client_opts, nil
 }
 
-func NewClient(ctx context.Context, uri string) (*opensearch.Client, error) {
+func NewClient(ctx context.Context, uri string) (*opensearchapi.Client, error) {
 
 	os_client_opts, err := ClientOptionsFromURI(ctx, uri)
 
@@ -130,7 +131,7 @@ func NewClient(ctx context.Context, uri string) (*opensearch.Client, error) {
 	return NewClientFromOptions(ctx, os_client_opts)
 }
 
-func NewClientFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*opensearch.Client, error) {
+func NewClientFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*opensearchapi.Client, error) {
 
 	os_client_opts := &ClientOptions{
 		Addresses: []string{
@@ -148,25 +149,27 @@ func NewClientFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*opensearch.Cl
 // NewClient is an opinionated method for returning a new `opensearch.Client` instance using a `ClientOptions`
 // for configuring basic settings for common Opensearch clients. If this method doesn't do what you need it to
 // it may make more to create a new client from scratch.
-func NewClientFromOptions(ctx context.Context, opts *ClientOptions) (*opensearch.Client, error) {
+func NewClientFromOptions(ctx context.Context, opts *ClientOptions) (*opensearchapi.Client, error) {
 
 	retry := backoff.NewExponentialBackOff()
 
-	os_cfg := opensearch.Config{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: opts.Insecure,
+	os_cfg := opensearchapi.Config{
+		Client: opensearch.Config{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					InsecureSkipVerify: opts.Insecure,
+				},
 			},
+			Addresses:     opts.Addresses,
+			RetryOnStatus: []int{502, 503, 504, 429},
+			RetryBackoff: func(i int) time.Duration {
+				if i == 1 {
+					retry.Reset()
+				}
+				return retry.NextBackOff()
+			},
+			MaxRetries: 5,
 		},
-		Addresses:     opts.Addresses,
-		RetryOnStatus: []int{502, 503, 504, 429},
-		RetryBackoff: func(i int) time.Duration {
-			if i == 1 {
-				retry.Reset()
-			}
-			return retry.NextBackOff()
-		},
-		MaxRetries: 5,
 	}
 
 	if opts.Debug {
@@ -177,7 +180,7 @@ func NewClientFromOptions(ctx context.Context, opts *ClientOptions) (*opensearch
 			EnableResponseBody: true,
 		}
 
-		os_cfg.Logger = opensearch_logger
+		os_cfg.Client.Logger = opensearch_logger
 	}
 
 	if opts.AWSCredentialsURI != "" {
@@ -194,15 +197,15 @@ func NewClientFromOptions(ctx context.Context, opts *ClientOptions) (*opensearch
 			return nil, fmt.Errorf("Failed to create request signer, %w", err)
 		}
 
-		os_cfg.Signer = signer
+		os_cfg.Client.Signer = signer
 
 	} else {
 
-		os_cfg.Username = opts.Username
-		os_cfg.Password = opts.Password
+		os_cfg.Client.Username = opts.Username
+		os_cfg.Client.Password = opts.Password
 	}
 
-	client, err := opensearch.NewClient(os_cfg)
+	client, err := opensearchapi.NewClient(os_cfg)
 
 	if err != nil {
 		return nil, fmt.Errorf("Failed to create client, %w", err)

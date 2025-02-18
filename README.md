@@ -6,6 +6,14 @@ Go package for indexing Who's On First records in OpenSearch.
 
 Documentation is incomplete at this time.
 
+## A note about version numbers
+
+The `github.com/whosonfirst/go-whosonfirst-opensearch` package targets the `opensearch-project/opensearch-go/v2` package.
+
+Starting with `github.com/whosonfirst/go-whosonfirst-opensearch/v4` version numbers will track which their corresponding major version of the `opensearch-project/opensearch-go` package.
+
+This is to account for things like a whole host of backwards incompatible changes between `opensearch-go/v2` and `opensearch-go/v3`.
+
 ## Tools
 
 ```
