@@ -1,4 +1,4 @@
-module github.com/whosonfirst/go-whosonfirst-opensearch
+module github.com/whosonfirst/go-whosonfirst-opensearch/v4
 
 go 1.23
 

@@ -9,7 +9,7 @@ import (
 
 	"github.com/opensearch-project/opensearch-go/v4/opensearchapi"
 	"github.com/sfomuseum/go-flags/flagset"
-	"github.com/whosonfirst/go-whosonfirst-opensearch/client"
+	"github.com/whosonfirst/go-whosonfirst-opensearch/v4/client"
 )
 
 func main() {

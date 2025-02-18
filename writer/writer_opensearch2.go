@@ -18,7 +18,7 @@ import (
 	"github.com/opensearch-project/opensearch-go/v4/opensearchutil"
 	"github.com/whosonfirst/go-whosonfirst-elasticsearch/document"
 	"github.com/whosonfirst/go-whosonfirst-feature/properties"
-	wof_client "github.com/whosonfirst/go-whosonfirst-opensearch/client"
+	wof_client "github.com/whosonfirst/go-whosonfirst-opensearch/v4/client"
 	sp_document "github.com/whosonfirst/go-whosonfirst-spelunker/document"
 	wof_writer "github.com/whosonfirst/go-writer/v3"
 )
