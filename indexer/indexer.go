@@ -18,6 +18,11 @@ type Indexer struct {
 	bulk_indexer opensearchutil.BulkIndexer
 }
 
+type BulkIndexerOptions struct {
+	Workers       int
+	FlushInterval time.Duration
+}
+
 func NewIndexer(ctx context.Context, opensearch_client *opensearchapi.Client, opensearch_index string) (*Indexer, error) {
 
 	idx := &Indexer{
@@ -30,6 +35,16 @@ func NewIndexer(ctx context.Context, opensearch_client *opensearchapi.Client, op
 
 func NewBulkIndexer(ctx context.Context, opensearch_client *opensearchapi.Client, opensearch_index string, workers int) (*Indexer, error) {
 
+	opts := &BulkIndexerOptions{
+		Workers:       10,
+		FlushInterval: 30 * time.Second,
+	}
+
+	return NewBulkIndexerWithOptions(ctx, opensearch_client, opensearch_index, opts)
+}
+
+func NewBulkIndexerWithOptions(ctx context.Context, opensearch_client *opensearchapi.Client, opensearch_index string, opts *BulkIndexerOptions) (*Indexer, error) {
+
 	idx, err := NewIndexer(ctx, opensearch_client, opensearch_index)
 
 	if err != nil {
@@ -39,8 +54,8 @@ func NewBulkIndexer(ctx context.Context, opensearch_client *opensearchapi.Client
 	bi_cfg := opensearchutil.BulkIndexerConfig{
 		Index:         opensearch_index,
 		Client:        opensearch_client,
-		NumWorkers:    workers,
-		FlushInterval: 30 * time.Second,
+		NumWorkers:    opts.Workers,
+		FlushInterval: opts.FlushInterval,
 		OnError: func(context.Context, error) {
 			if err != nil {
 				slog.Error("Bulk indexer reported an error", "error", err)
