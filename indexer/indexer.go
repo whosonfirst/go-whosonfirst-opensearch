@@ -13,14 +13,16 @@ import (
 )
 
 type Indexer struct {
-	client       *opensearchapi.Client
-	index        string
-	bulk_indexer opensearchutil.BulkIndexer
+	client               *opensearchapi.Client
+	index                string
+	bulk_indexer         opensearchutil.BulkIndexer
+	bulk_indexer_verbose bool
 }
 
 type BulkIndexerOptions struct {
 	Workers       int
 	FlushInterval time.Duration
+	Verbose       bool
 }
 
 func NewIndexer(ctx context.Context, opensearch_client *opensearchapi.Client, opensearch_index string) (*Indexer, error) {
@@ -33,7 +35,7 @@ func NewIndexer(ctx context.Context, opensearch_client *opensearchapi.Client, op
 	return idx, nil
 }
 
-func NewBulkIndexer(ctx context.Context, opensearch_client *opensearchapi.Client, opensearch_index string, workers int) (*Indexer, error) {
+func NewBulkIndexer(ctx context.Context, opensearch_client *opensearchapi.Client, opensearch_index string) (*Indexer, error) {
 
 	opts := &BulkIndexerOptions{
 		Workers:       10,
@@ -63,7 +65,11 @@ func NewBulkIndexerWithOptions(ctx context.Context, opensearch_client *opensearc
 		},
 		// OnFlushStart func(context.Context) context.Context // Called when the flush starts.
 		OnFlushEnd: func(context.Context) {
-			slog.Debug("Bulk indexer flush end")
+			if opts.Verbose {
+				slog.Info("Bulk indexer flush complete")
+			} else {
+				slog.Debug("Bulk indexer flush complete")
+			}
 		},
 	}
 
@@ -74,6 +80,7 @@ func NewBulkIndexerWithOptions(ctx context.Context, opensearch_client *opensearc
 	}
 
 	idx.bulk_indexer = bulk_idx
+	idx.bulk_indexer_verbose = opts.Verbose
 	return idx, nil
 }
 
@@ -123,9 +130,13 @@ func (idx *Indexer) IndexDocumentWithReader(ctx context.Context, doc_id string, 
 		Action:     "index",
 		DocumentID: doc_id,
 		Body:       r,
-
 		OnSuccess: func(ctx context.Context, item opensearchutil.BulkIndexerItem, res opensearchapi.BulkRespItem) {
-			slog.Debug("Index complete", "doc_id", doc_id)
+
+			if idx.bulk_indexer_verbose {
+				slog.Info("Index complete", "doc_id", doc_id)
+			} else {
+				slog.Debug("Index complete", "doc_id", doc_id)
+			}
 		},
 
 		OnFailure: func(ctx context.Context, item opensearchutil.BulkIndexerItem, res opensearchapi.BulkRespItem, err error) {
