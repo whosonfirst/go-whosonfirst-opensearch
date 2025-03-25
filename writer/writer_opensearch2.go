@@ -30,7 +30,8 @@ func init() {
 }
 
 // OpensearchV2Writer is a struct that implements the `Writer` interface for writing documents to an Opensearch
-// index using the github.com/opensearch-project/opensearch-go/v2 package.
+// index using the github.com/opensearch-project/opensearch-go/v4 package. "V2" represents OpenSearch v2.x whereas
+// "v4" represents the "opensearch-go/v4" package. I also find it confusing.
 type OpensearchV2Writer struct {
 	wof_writer.Writer // whosonfirst/go-writer.Writer interface
 	DocumentWriter    // whosonfirst/go-whosonfirst-opensearch/writer.DocumentWriter interface
