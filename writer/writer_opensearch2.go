@@ -170,42 +170,56 @@ func NewOpensearchV2Writer(ctx context.Context, uri string) (wof_writer.Writer, 
 // Write copies the content of 'fh' to the Opensearch index defined in `NewOpensearchV2Writer`.
 func (wr *OpensearchV2Writer) Write(ctx context.Context, path string, r io.ReadSeeker) (int64, error) {
 
+	logger := slog.Default()
+	logger = logger.With("path", path)
+
 	body, err := io.ReadAll(r)
 
 	if err != nil {
+		logger.Error("Failed to read body", "error", err)
 		return 0, fmt.Errorf("Failed to read body for %s, %w", path, err)
 	}
 
 	id, err := properties.Id(body)
 
 	if err != nil {
+		logger.Error("Feature missing ID", "error", err)
 		return 0, fmt.Errorf("Failed to derive ID for %s, %w", path, err)
 	}
+
+	logger = logger.With("id", id)
 
 	doc_id := strconv.FormatInt(id, 10)
 
 	alt_label, err := properties.AltLabel(body)
 
 	if err != nil {
+		logger.Error("Failed to derive alt body", "error", err)
 		return 0, fmt.Errorf("Failed to derive alt label for %s, %w", path, err)
 	}
+
+	logger = logger.With("alt label", alt_label)
 
 	if alt_label != "" {
 
 		if !wr.index_alt_files {
+			logger.Debug("Do not index alt files, skipping")
 			return 0, nil
 		}
 
 		doc_id = fmt.Sprintf("%s-%s", doc_id, alt_label)
 	}
 
+	logger = logger.With("doc id", doc_id)
+
 	// START OF manipulate body here...
 
-	for _, f := range wr.prepare_funcs {
+	for offset, f := range wr.prepare_funcs {
 
 		new_body, err := f(ctx, body)
 
 		if err != nil {
+			logger.Error("Failed to execute prepare function", "offset", offset, "error", err)
 			return 0, fmt.Errorf("Failed to execute prepare func, %w", err)
 		}
 
@@ -217,7 +231,7 @@ func (wr *OpensearchV2Writer) Write(ctx context.Context, path string, r io.ReadS
 	// Nothing to store
 
 	if len(body) == 0 {
-		slog.Debug("Document yields an empty body after prepping, skipping", "path", path)
+		logger.Debug("Document yields an empty body after prepping, skipping", "path", path)
 		return 0, nil
 	}
 
@@ -225,12 +239,14 @@ func (wr *OpensearchV2Writer) Write(ctx context.Context, path string, r io.ReadS
 	err = json.Unmarshal(body, &f)
 
 	if err != nil {
+		logger.Error("Failed to unmarshal feature", "error", err)
 		return 0, fmt.Errorf("Failed to unmarshal %s, %v", path, err)
 	}
 
 	enc_f, err := json.Marshal(f)
 
 	if err != nil {
+		logger.Error("Failed to (re)marshal feature", "error", err)
 		return 0, fmt.Errorf("Failed to marshal %s, %v", path, err)
 	}
 
@@ -259,6 +275,7 @@ func (wr *OpensearchV2Writer) Write(ctx context.Context, path string, r io.ReadS
 		_, err := wr.client.Index(ctx, req)
 
 		if err != nil {
+			logger.Error("Failed to index record", "error", err)
 			return 0, fmt.Errorf("Error getting response: %w", err)
 		}
 
@@ -298,9 +315,11 @@ func (wr *OpensearchV2Writer) Write(ctx context.Context, path string, r io.ReadS
 		},
 	}
 
+	logger.Debug("Add record to bulk indexer")
 	err = wr.indexer.Add(ctx, bulk_item)
 
 	if err != nil {
+		logger.Error("Failed to add record to bulk indexer", "error", err)
 		return 0, fmt.Errorf("Failed to add bulk item for %s, %w", path, err)
 	}
 
