@@ -1,5 +1,8 @@
 package main
 
+// Everything in here needs to be refactored because the /opensearchapi/api-aliases.go code
+// doesn't actually return a list of aliases...
+
 import (
 	"context"
 	"encoding/json"
