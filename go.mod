@@ -10,7 +10,7 @@ require (
 	github.com/opensearch-project/opensearch-go/v4 v4.5.0
 	github.com/sfomuseum/go-flags v0.10.0
 	github.com/whosonfirst/go-whosonfirst-elasticsearch v0.11.0
-	github.com/whosonfirst/go-whosonfirst-feature v0.0.28
+	github.com/whosonfirst/go-whosonfirst-feature v0.0.29
 	github.com/whosonfirst/go-whosonfirst-iterate-git/v3 v3.0.1
 	github.com/whosonfirst/go-whosonfirst-iterwriter/v4 v4.0.0
 	github.com/whosonfirst/go-whosonfirst-spelunker v0.0.6
@@ -64,7 +64,7 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/natefinch/atomic v1.0.1 // indirect
-	github.com/paulmach/orb v0.10.0 // indirect
+	github.com/paulmach/orb v0.11.1 // indirect
 	github.com/pjbgf/sha1cd v0.3.2 // indirect
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
 	github.com/sfomuseum/go-edtf v1.2.1 // indirect
@@ -77,7 +77,7 @@ require (
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/whosonfirst/go-ioutil v1.0.2 // indirect
-	github.com/whosonfirst/go-whosonfirst-flags v0.5.1 // indirect
+	github.com/whosonfirst/go-whosonfirst-flags v0.5.2 // indirect
 	github.com/whosonfirst/go-whosonfirst-iterate/v3 v3.0.0 // indirect
 	github.com/whosonfirst/go-whosonfirst-placetypes v0.7.3 // indirect
 	github.com/whosonfirst/go-whosonfirst-sources v0.1.0 // indirect

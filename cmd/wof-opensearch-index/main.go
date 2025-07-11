@@ -13,12 +13,10 @@ import (
 func main() {
 
 	ctx := context.Background()
-	logger := log.Default()
-
-	err := iterwriter.Run(ctx, logger)
+	err := iterwriter.Run(ctx)
 
 	if err != nil {
-		logger.Fatalf("Failed to iterate, %v", err)
+		log.Fatalf("Failed to iterate, %v", err)
 	}
 
 }
