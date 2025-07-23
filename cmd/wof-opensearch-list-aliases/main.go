@@ -1,5 +1,8 @@
 package main
 
+// Everything in here needs to be refactored because the /opensearchapi/api-aliases.go code
+// doesn't actually return a list of aliases...
+
 import (
 	"context"
 	"encoding/json"
@@ -26,13 +29,13 @@ func main() {
 		log.Fatalf("Failed to create Opensearch client, %v", err)
 	}
 
-	req := opensearchapi.AliasGetReq{
-		Params: opensearchapi.AliasGetParams{
+	req := opensearchapi.AliasesReq{
+		Params: opensearchapi.AliasesParams{
 			Pretty: true,
 		},
 	}
 
-	rsp, err := os_client.Indices.Alias.Get(ctx, req)
+	rsp, err := os_client.Aliases(ctx, req)
 
 	if err != nil {
 		log.Fatalf("Failed to execute request, %v", err)
