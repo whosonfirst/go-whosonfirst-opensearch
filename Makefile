@@ -12,7 +12,7 @@ cli:
 	env GOOS=$(GOOS) GOARCH=$(GOARCH) go build -mod $(GOMOD) -ldflags="$(LDFLAGS)" -o bin/wof-opensearch-put-mapping cmd/wof-opensearch-put-mapping/main.go
 	env GOOS=$(GOOS) GOARCH=$(GOARCH) go build -mod $(GOMOD) -ldflags="$(LDFLAGS)" -o bin/wof-opensearch-get-mapping cmd/wof-opensearch-get-mapping/main.go
 	env GOOS=$(GOOS) GOARCH=$(GOARCH) go build -mod $(GOMOD) -ldflags="$(LDFLAGS)" -o bin/wof-opensearch-put-settings cmd/wof-opensearch-put-settings/main.go
-	env GOOS=$(GOOS) GOARCH=$(GOARCH) go build -mod $(GOMOD) -ldflags="$(LDFLAGS)" -o bin/wof-opensearch-list-aliases cmd/wof-opensearch-list-aliases/main.go
+	env GOOS=$(GOOS) GOARCH=$(GOARCH) go build -mod $(GOMOD) -ldflags="$(LDFLAGS)" -o bin/wof-opensearch-list-indices cmd/wof-opensearch-list-indices/main.go
 	env GOOS=$(GOOS) GOARCH=$(GOARCH) go build -mod $(GOMOD) -ldflags="$(LDFLAGS)" -o bin/wof-opensearch-indices-stats cmd/wof-opensearch-indices-stats/main.go
 
 doc:

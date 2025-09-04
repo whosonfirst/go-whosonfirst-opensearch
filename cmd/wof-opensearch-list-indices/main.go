@@ -1,11 +1,9 @@
 package main
 
-// Everything in here needs to be refactored because the /opensearchapi/api-aliases.go code
-// doesn't actually return a list of aliases...
-
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 
@@ -16,7 +14,10 @@ import (
 
 func main() {
 
+	var raw bool
+
 	fs := flagset.NewFlagSet("opensearch")
+	fs.BoolVar(&raw, "raw", false, "Display raw response JSON.")
 
 	client.AppendClientFlags(fs)
 	flagset.Parse(fs)
@@ -29,24 +30,26 @@ func main() {
 		log.Fatalf("Failed to create Opensearch client, %v", err)
 	}
 
-	req := opensearchapi.AliasesReq{
-		Params: opensearchapi.AliasesParams{
-			Pretty: true,
-		},
-	}
+	req := &opensearchapi.CatIndicesReq{}
 
-	rsp, err := os_client.Aliases(ctx, req)
+	rsp, err := os_client.Cat.Indices(ctx, req)
 
 	if err != nil {
 		log.Fatalf("Failed to execute request, %v", err)
 	}
 
-	enc := json.NewEncoder(os.Stdout)
-	err = enc.Encode(rsp)
+	if raw {
+		enc := json.NewEncoder(os.Stdout)
+		err = enc.Encode(rsp)
 
-	if err != nil {
-		log.Fatalf("Failed to copy response, %v", err)
+		if err != nil {
+			log.Fatalf("Failed to copy response, %v", err)
+		}
+
+		return
 	}
 
-	os.Exit(0)
+	for _, idx := range rsp.Indices {
+		fmt.Printf("%s\t%s\t%s\n", idx.Health, idx.UUID, idx.Index)
+	}
 }

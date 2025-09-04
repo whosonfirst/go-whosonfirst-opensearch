@@ -89,12 +89,12 @@ $> ./bin/wof-opensearch-index \
 
 TBW. Have a look at [writer/writer_opensearch2.go](writer/writer_opensearch2.go) and [whosonfirst/go-whosonfirst-iterwriter](https://github.com/whosonfirst/go-whosonfirst-iterwriter) for the time being.
 
-### wof-opensearch-list-aliases
+### wof-opensearch-list-indices
 
-List all the aliases for an OpenSearch instance.
+List all the indices for an OpenSearch instance.
 
 ```
-$> ./bin/wof-opensearch-list-aliases \
+$> ./bin/wof-opensearch-list-indices \
 	-opensearch-aws-credentials-uri 'aws://{REGION}?credentials=iam:' \
 	-opensearch-endpoint https://{OPENSEARCH_DOMAIN}.{REGION}.es.amazonaws.com \
 ```
