@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aaronland/go-aws-auth"
+	"github.com/aaronland/go-aws/v3/auth"
 	"github.com/cenkalti/backoff/v4"
 	"github.com/opensearch-project/opensearch-go/v4"
 	"github.com/opensearch-project/opensearch-go/v4/opensearchapi"

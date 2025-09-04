@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/aaronland/go-aws-auth"
+	"github.com/aaronland/go-aws/v3/auth"
 	requestsigner "github.com/opensearch-project/opensearch-go/v4/signer/awsv2"
 )
 
