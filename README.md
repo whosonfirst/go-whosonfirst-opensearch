@@ -2,6 +2,10 @@
 
 Go package for indexing Who's On First records in OpenSearch.
 
+## Deprecation notice
+
+This package has been deprecated and will no longer be maintained. All of its functionality has been moved in to the [whosonfirst/go-whosonfirst-database](https://github.com/whosonfirst/go-whosonfirst-database) package.
+
 ## Documentation
 
 Documentation is incomplete at this time.
